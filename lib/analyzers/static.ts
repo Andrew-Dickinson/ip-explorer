@@ -34,7 +34,7 @@ export function analyzeStatic(address: IPv4): StaticAnalysisResult {
   }
 
   let staticAddressCategory: StaticAddressCategory | undefined = undefined;
-  if ([AddressType.STATIC_10_10, AddressType.STATIC_10_70].includes(addressType)) {
+  if ([AddressType.STATIC_10_10, AddressType.STATIC_10_70, AddressType.PUBLIC].includes(addressType)) {
     for (const cidr in staticCategoryCIDRs) {
       if (address.match(IPv4.parseCIDR(cidr))){
         staticAddressCategory = staticCategoryCIDRs[cidr];

@@ -1,4 +1,4 @@
-import {AddressProvenance, AddressType, StaticAddressCategory} from "@/lib/types";
+import {AddressProvenance, AddressType, StaticAddressCategory} from "./types";
 
 
 export const addressProvenanceCIDRs : Record<string, AddressProvenance> = {
@@ -37,4 +37,8 @@ export const staticCategoryCIDRs : Record<string, StaticAddressCategory> = {
   "10.70.251.0/24": StaticAddressCategory.PTP_251_30,
   "10.70.253.0/24": StaticAddressCategory.PTP_253_31,
   "10.70.254.0/24": StaticAddressCategory.LOOPBACKS,
+  "23.158.16.0/24":  StaticAddressCategory.SN10,
+  "199.167.59.0/24": StaticAddressCategory.SN1,
+  "199.170.132.0/24":  StaticAddressCategory.SN3,
+  "208.68.5.0/24":  StaticAddressCategory.SN11,
 };

@@ -48,7 +48,6 @@ export const IPExplainerExamples = () => {
       addressOctets={["192", "168", "0", "1"]}
       addressProvenance={AddressProvenance.MEMBER_PRIVATE_RFC_1918}
       addressType={AddressType.MEMBER}
-      staticAddressCategory={StaticAddressCategory.ANYCAST}
     />
   </div>
 }
