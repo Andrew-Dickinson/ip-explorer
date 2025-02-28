@@ -9,39 +9,69 @@ import {NNIPsResult, StaticAnalysisResult} from "@/lib/types";
 import {Button} from "@/components/ui/button";
 import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger} from "@/components/ui/sheet";
 import {ScrollArea} from "@/components/ui/scroll-area";
-import {Lightbulb} from "lucide-react";
+import {ArrowRight, Ban, Lightbulb} from "lucide-react";
 import {nnIps} from "@/lib/analyzers/nn-ips";
 import {IpsForNN} from "@/components/ui/cards/ips-for-nn";
+import {IcmpReachability} from "@/components/ui/cards/icmp-reachability";
+import {Card, CardContent} from "@/components/ui/card";
 
 
 export default function Home() {
   const [inputAddress, setInputAddress] = useState<string>("");
+  const [analysisAddress, setAnalysisAddress] = useState<string>("");
 
+  const addressValid = IPv4.isValidFourPartDecimal(inputAddress);
   let parsedAddress: IPv4 | undefined = undefined;
   let staticResult: StaticAnalysisResult | undefined = undefined;
   let nnIPsResult: NNIPsResult | undefined = undefined;
-  try {
-    parsedAddress = IPv4.parse(inputAddress);
-    staticResult = analyzeStatic(parsedAddress);
-    if (staticResult.networkNumber) {
-      nnIPsResult = nnIps(staticResult.networkNumber);
+
+  const showResults = inputAddress && inputAddress == analysisAddress;
+  if (showResults) {
+    try {
+      parsedAddress = IPv4.parse(analysisAddress);
+      staticResult = analyzeStatic(parsedAddress);
+      if (staticResult.networkNumber) {
+        nnIPsResult = nnIps(staticResult.networkNumber);
+      }
+    } catch {
     }
-  } catch {}
+  }
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 sm:px-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 w-full items-center sm:items-start">
         <div className="w-full max-w-2xl mx-auto p-6 space-y-6">
           <div className="space-y-4">
-            <h2 className={"font-bold text-2xl"}>IP Explorer</h2>
+            <h2 className={"font-bold text-2xl"}><img src={"NYC_mesh_logo.svg"} className={"h-10 inline mr-1 -mt-1"}/> NYC Mesh <span className={"font-normal"}>|</span> <span className={"font-normal"}>IP Explorer</span></h2>
             <div className="flex items-center gap-2">
               <Input
                 type="text"
                 placeholder="Enter IP address..."
-                className="w-full text-lg"
+                className="text-lg max-w-md"
                 value={inputAddress}
-                onInput={(e: React.ChangeEvent<HTMLInputElement>) => setInputAddress(e.target.value)}
+                onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setInputAddress(e.target.value);
+                  setAnalysisAddress("");
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && addressValid) setAnalysisAddress(inputAddress);
+                }}
               />
+              <Button variant={"default"}
+                      icon={ArrowRight}
+                      disabled={!addressValid}
+                      onClick={() => setAnalysisAddress(inputAddress)}/>
+            </div>
+            {
+              parsedAddress !== undefined && staticResult?.addressProvenance !== undefined ?
+                <IcmpReachability
+                  ipAddress={parsedAddress}
+                />
+                :
+                <></>
+            }
+            {
+              !showResults &&
               <Sheet>
                 <SheetTrigger asChild><Button variant={"secondary"} icon={Lightbulb}>Examples</Button></SheetTrigger>
                 <SheetContent className="w-[100vw] sm:max-w-2xl">
@@ -55,21 +85,38 @@ export default function Home() {
                   </ScrollArea>
                 </SheetContent>
               </Sheet>
-            </div>
+            }
             { staticResult ?
               <IpExplainerCard {...staticResult}/>
-              : <></>
+              :
+              showResults && <Card className={"max-w-lg"}>
+                <CardContent>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-5">
+                            <div
+                                className="h-10 w-10 rounded-full bg-red-100 flex flex-none items-center justify-center">
+                                <Ban className="h-5 w-5 text-red-600"/>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="font-medium">Invalid Address</p>
+                                <p className="text-xs text-muted-foreground">
+                                    This doesn&#39;t look like a valid NYC Mesh IP address. Please check that the entered address is correct and try again
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+                </Card>
             }
-            { staticResult && staticResult.networkNumber && nnIPsResult ?
-                <IpsForNN
-                  networkNumber={staticResult.networkNumber}
-                  addresses={nnIPsResult.addresses}
-                  CIDRs={nnIPsResult.CIDRs}
-                />
-                :
-                <></>
+            {staticResult && staticResult.networkNumber && nnIPsResult ?
+              <IpsForNN
+                networkNumber={staticResult.networkNumber}
+                addresses={nnIPsResult.addresses}
+                CIDRs={nnIPsResult.CIDRs}
+              />
+              :
+              <></>
             }
-
           </div>
         </div>
       </main>

@@ -45,9 +45,10 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, icon: Icon, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+    const marginClass = Icon && children ? "mr-2" : "";
     return (
       <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
-        {Icon && <Icon className="mr-2 h-5 w-5" />}
+        {Icon && <Icon className={`h-5 w-5 ${marginClass}`} />}
         {children}
       </Comp>
     )
