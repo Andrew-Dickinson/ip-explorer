@@ -135,4 +135,8 @@
   [role='button']:disabled {
     cursor: default;
   }
+
+  a {
+    @apply underline hover:text-gray-800
+  }
 }

@@ -14,6 +14,7 @@ import {nnIps} from "@/lib/analyzers/nn-ips";
 import {IpsForNN} from "@/components/ui/cards/ips-for-nn";
 import {IcmpReachability} from "@/components/ui/cards/icmp-reachability";
 import {Card, CardContent} from "@/components/ui/card";
+import {TcpConnectivity} from "@/components/ui/cards/tcp-connectivity";
 
 
 export default function Home() {
@@ -64,9 +65,15 @@ export default function Home() {
             </div>
             {
               parsedAddress !== undefined && staticResult?.addressProvenance !== undefined ?
-                <IcmpReachability
-                  ipAddress={parsedAddress}
-                />
+                <>
+                  <IcmpReachability
+                    ipAddress={parsedAddress}
+                  />
+                  <TcpConnectivity
+                    ipAddress={parsedAddress}
+                    ports={[22, 80, 443]}
+                  />
+                </>
                 :
                 <></>
             }

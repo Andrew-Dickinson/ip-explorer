@@ -43,6 +43,12 @@ export enum StaticAddressCategory {
   UNKNOWN = "Unknown",
 }
 
+export enum PortStatus {
+  OPEN= "Open",
+  CLOSED = "Closed",
+  TIMEOUT = "Timeout"
+}
+
 
 export interface StaticAnalysisResult {
   addressOctets: string[];
