@@ -1,10 +1,9 @@
-import {Input} from "@/components/ui/input";
-import {IpExplainerCard} from "@/components/ui/ip-explainer";
+import {IpExplainerCard} from "@/components/ui/cards/ip-explainer";
 import {AddressProvenance, AddressType, StaticAddressCategory} from "@/lib/types";
 
 
 export const IPExplainerExamples = () => {
-  return <div className="space-y-4">
+  return <div className="space-y-4 max-w-[100vw] p-2 pb-40">
     <IpExplainerCard
       addressOctets={["10", "68", "12", "23"]}
       addressProvenance={AddressProvenance.MESH_RFC_1918}

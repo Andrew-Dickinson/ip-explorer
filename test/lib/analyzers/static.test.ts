@@ -1,7 +1,7 @@
 import {analyzeStatic} from '@/lib/analyzers/static'
 import {describe, expect, it} from "@jest/globals";
 import {IPv4} from "ipaddr.js";
-import {AddressProvenance, AddressType, StaticAddressCategory} from "../../../lib/types";
+import {AddressProvenance, AddressType, StaticAddressCategory} from "@/lib/types";
 
 describe("analyze static helper function", () => {
   it("handles OSPF addresses", () => {

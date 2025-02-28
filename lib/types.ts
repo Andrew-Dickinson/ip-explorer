@@ -1,8 +1,21 @@
+import {IPv4} from "ipaddr.js";
 
 export enum AddressProvenance {
   MESH_RFC_1918 = "Mesh Internal\n(RFC 1918)",
   MESH_PUBLIC = "Mesh Public",
   MEMBER_PRIVATE_RFC_1918 = "Member Private\n(RFC 1918)",
+}
+
+export interface ExplainedAddress {
+  address: IPv4,
+  description: string,
+}
+
+export interface ExplainedCIDR {
+  address: IPv4,
+  length: number,
+  activeSubset?: [IPv4, IPv4],
+  description: string,
 }
 
 export enum AddressType {
@@ -39,4 +52,9 @@ export interface StaticAnalysisResult {
   routerIndex?: number;
   dhcpExplainerComponents?: string[];
   staticAddressCategory?: StaticAddressCategory;
+}
+
+export interface NNIPsResult {
+  addresses: ExplainedAddress[];
+  CIDRs: ExplainedCIDR[];
 }

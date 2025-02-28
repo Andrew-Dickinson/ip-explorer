@@ -6,6 +6,7 @@ import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {AspectRatio} from "@/components/ui/aspect-ratio";
 import {useEffect, useRef, useState} from 'react';
 import {AddressProvenance, AddressType, StaticAddressCategory} from "@/lib/types";
+import {THRID_IP_CUTOFF} from "@/lib/analyzers/nn-ips";
 
 export interface IpExplainerCardProps extends React.ComponentProps<"div"> {
   addressOctets: string[];
@@ -62,7 +63,7 @@ export function IpExplainerCard({
   else if (addressType == AddressType.DHCP) { containerHeight += bottomBendPointRelY + 220; }
   const containerWidth = 574;
 
-  const thirdRouterPossible = routerIndex !== undefined ? Number.parseInt(addressOctets[3]) <= 55 : undefined;
+  const thirdRouterPossible = routerIndex !== undefined ? Number.parseInt(addressOctets[3]) <= THRID_IP_CUTOFF : undefined;
 
   useEffect(() => {
     const updateScale = () => {
@@ -84,7 +85,7 @@ export function IpExplainerCard({
     {...props}>
     <CardHeader>
       <CardTitle>Address Breakdown</CardTitle>
-      <CardDescription>Shows information obtained directly from the bytes of the IP address</CardDescription>
+      <CardDescription className={"text-xs"}>Shows information obtained directly from the bytes of the IP address</CardDescription>
     </CardHeader>
     <CardContent>
       <AspectRatio ratio={containerWidth / containerHeight} ref={containerRef}>
@@ -344,47 +345,44 @@ export function IpExplainerCard({
       <Separator className="my-1"/>
     </CardContent>
     <CardFooter>
-      <div className="flex space-x-5">
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium leading-none flex items-center gap-2">
+      <div className="flex flex-wrap text-sm mx-auto gap-3 gap-y-6">
+        <div className="space-y-2 w-30 m-0 ">
+          <h4 className="font-medium leading-none flex items-center gap-2">
             <Globe className="h-4 w-4"/>
             Address Provenance
           </h4>
-          <p className="text-sm">
+          <p>
             {addressProvenance.split("\n").map((str, i) => <span key={i}>{str}<br/></span>)}
           </p>
         </div>
-        <Separator orientation="vertical" />
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium leading-none flex items-center gap-2">
+        <div className="space-y-2 w-30 m-0">
+          <h4 className="font-medium leading-none flex items-center gap-2">
             <Network className="h-4 w-4" />
             Address Type
           </h4>
-          <p className="text-sm">
+          <p>
             {addressType.split("\n").map((str, i) => <span key={i}>{str}<br/></span>)}
           </p>
         </div>
         { networkNumber !== undefined ?
           <>
-            <Separator orientation="vertical" />
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium leading-none flex items-center gap-2">
+            <div className="space-y-2 w-30 m-0">
+              <h4 className="font-medium leading-none flex items-center gap-2">
                 <Hash className="h-4 w-4" />
                 Network Number
               </h4>
-              <p className="text-sm">{networkNumber}</p>
+              <p>{networkNumber}</p>
             </div>
           </> : <></>
         }
         { routerIndex !== undefined ? <>
-        <Separator orientation="vertical" />
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium leading-none flex items-center gap-2">
+        <div className="space-y-2 w-30 m-0">
+          <h4 className="font-medium leading-none flex items-center gap-2">
             <Router className="h-4 w-4" />
             Router Index
           </h4>
           <div className="flex space-x-2">
-          <p className="text-sm">
+          <p>
             {routerIndex + 1} /  {thirdRouterPossible ? 3 : 2 }
           </p>
 
@@ -411,14 +409,13 @@ export function IpExplainerCard({
         </> : <></>
         }
         { staticAddressCategory !== undefined ? <>
-        <Separator orientation="vertical" />
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium leading-none flex items-center gap-2">
+        <div className="space-y-2 w-30 m-0">
+          <h4 className="font-medium leading-none flex items-center gap-2">
             <Server className="h-4 w-4" />
             Static Address Category
           </h4>
           <div className="flex space-x-2">
-          <p className="text-sm">
+          <p>
             {staticAddressCategory}
           </p>
           </div>

@@ -55,8 +55,6 @@ export function analyzeStatic(address: IPv4): StaticAnalysisResult {
       dhcpOffset.toString(),
       networkNumber.toString(),
     ];
-
-    console.log(dhcpExplainerComponents[0])
   }
 
   return {
