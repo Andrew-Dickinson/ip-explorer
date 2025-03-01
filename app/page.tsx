@@ -1,7 +1,7 @@
 "use client";
 import {IPExplainerExamples} from "@/components/examples";
 import {Input} from "@/components/ui/input";
-import {IpExplainerCard} from "@/components/ui/cards/ip-explainer";
+import {IpExplainerCard} from "@/components/cards/ip-explainer";
 import React, {useState} from "react";
 import {IPv4} from "ipaddr.js";
 import {analyzeStatic} from "@/lib/analyzers/static";
@@ -11,10 +11,10 @@ import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger} from "@/comp
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {ArrowRight, Ban, Lightbulb} from "lucide-react";
 import {nnIps} from "@/lib/analyzers/nn-ips";
-import {IpsForNN} from "@/components/ui/cards/ips-for-nn";
-import {IcmpReachability} from "@/components/ui/cards/icmp-reachability";
+import {IpsForNN} from "@/components/cards/ips-for-nn";
+import {IcmpReachability} from "@/components/cards/icmp-reachability";
 import {Card, CardContent} from "@/components/ui/card";
-import {TcpConnectivity} from "@/components/ui/cards/tcp-connectivity";
+import {TcpConnectivity} from "@/components/cards/tcp-connectivity";
 
 
 export default function Home() {
