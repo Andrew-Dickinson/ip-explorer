@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import {Clock, CloudAlert, ArrowUpDown, Activity} from "lucide-react"
+import {Clock, ArrowUpDown, Activity, AlertTriangle} from "lucide-react"
 import {checkIcmpReachability, PingResult} from "@/lib/actions/ping"
 import {IPv4} from "ipaddr.js";
 import {runParallelAction} from "next-server-actions-parallel";
@@ -65,7 +65,7 @@ export function IcmpReachability({
             ) : error ? (
               <>
                 <div className="h-10 w-10 rounded-full bg-amber-100 flex flex-none items-center justify-center">
-                  <CloudAlert className="h-5 w-5 text-amber-600" />
+                  <AlertTriangle className="h-5 w-5 text-amber-600" />
                 </div>
                 <div className="space-y-1">
                   <p className="font-medium">Error Determining Reachability</p>
@@ -94,7 +94,7 @@ export function IcmpReachability({
             ) : (
               <>
                 <div className="h-10 w-10 rounded-full bg-red-100 flex flex-none items-center justify-center">
-                  <CloudAlert className="h-5 w-5 text-red-600"/>
+                  <AlertTriangle className="h-5 w-5 text-red-600"/>
                 </div>
                 <div className="space-y-1">
                   <p className="font-medium">Host is unreachable</p>

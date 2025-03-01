@@ -109,8 +109,8 @@ export function IpRangesIps({
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-red-100 flex flex-none items-center justify-center">
-              <AlertTriangle className="h-5 w-5 text-red-600"/>
+            <div className="h-10 w-10 rounded-full bg-amber-100 flex flex-none items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-amber-600"/>
             </div>
             <div className="space-y-1">
               <p className="font-medium">Address not found in sheeet</p>
@@ -133,7 +133,7 @@ interface InfoTagProps {
   value: string
 }
 
-function InfoTag({ icon: Icon, label, value }: InfoTagProps) {
+function InfoTag({icon: Icon, label, value}: InfoTagProps) {
   if (!value) return null
 
   return (

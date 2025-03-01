@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { CloudAlert, Server } from "lucide-react"
+import {AlertTriangle, Server} from "lucide-react"
 import {performSnmpQuery, SnmpError, type SnmpQueryResult, SnmpResult} from "@/lib/actions/snmp-query"
 import type { IPv4 } from "ipaddr.js"
 import {runParallelAction} from "next-server-actions-parallel";
@@ -64,7 +64,7 @@ export function SnmpInfo({
         ) : error ? (
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-amber-100 flex flex-none items-center justify-center">
-              <CloudAlert className="h-5 w-5 text-amber-600" />
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
             </div>
             <div className="space-y-1">
               <p className="font-medium">Error Fetching SNMP Information</p>

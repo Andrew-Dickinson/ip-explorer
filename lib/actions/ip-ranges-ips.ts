@@ -90,13 +90,13 @@ async function fetchIpRangeData(): Promise<IpRangeData[]> {
         let prefix = row.prefix.trim();
 
         // Add /32 if no prefix length is specified
-        if (!prefix.includes("/")) {
+        if (prefix && !prefix.includes("/")) {
           prefix = `${prefix}/32`
         }
         return {...row, prefix}
       })
       // Filter out rows without a prefix and any additional header rows
-      .filter((data: IpRangeData) => data.prefix && data.prefix !== "Prefix");
+      .filter((data: IpRangeData) => data.prefix && IPv4.isValidCIDR(data.prefix));
 
     // Update cache
     cache = {
@@ -131,7 +131,7 @@ async function checkIpRangeInner(ipAddress: string): Promise<IpRangeLookupResult
     for (const rangeData of rangesData) {
       try {
         const [networkAddr, prefixLength] = parseCIDR(rangeData.prefix)
-        if (ip.match(networkAddr, prefixLength)) {
+        if (networkAddr.kind() === "ipv4" && ip.match(networkAddr, prefixLength)) {
           hits.push(rangeData);
         }
       } catch (e) {

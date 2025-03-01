@@ -186,10 +186,10 @@ async function performSnmpQueryInner(
 
     return {results}
   } catch (error) {
-    console.error("SNMP query error:", error);
     if (error instanceof Error && 'name' in error && error.name === "RequestTimedOutError") {
       throw new Error("No response from device, request timed out");
     } else {
+      console.error("SNMP query error:", error);
       throw new Error("Unknown error while performing SNMP query, check logs")
     }
   } finally {

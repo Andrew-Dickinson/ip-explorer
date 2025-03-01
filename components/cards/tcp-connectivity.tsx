@@ -4,7 +4,7 @@ import type React from "react"
 import {useEffect, useState} from "react"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
 import {Skeleton} from "@/components/ui/skeleton"
-import {BrickWall, Cable, ClockAlert, CloudAlert} from "lucide-react"
+import {AlertTriangle, BrickWall, Cable, ClockAlert} from "lucide-react"
 import {checkTcpConnectivity, type TcpConnectivityResult} from "@/lib/actions/tcp-check"
 import type {IPv4} from "ipaddr.js"
 import {Badge} from "@/components/ui/badge"
@@ -68,7 +68,7 @@ export function TcpConnectivity({
           ) : error ? (
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-amber-100 flex flex-none items-center justify-center">
-                <CloudAlert className="h-5 w-5 text-amber-600" />
+                <AlertTriangle className="h-5 w-5 text-amber-600" />
               </div>
               <div className="space-y-1">
                 <p className="font-medium">Error Checking TCP Connectivity</p>
