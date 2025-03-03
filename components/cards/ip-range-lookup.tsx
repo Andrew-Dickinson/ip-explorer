@@ -86,7 +86,7 @@ export function IpRangeLookup({
             </div>
 
             <div className="grid gap-3 text-sm">
-              <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+              <div className="grid gap-y-4  gap-x-0 sm:grid-cols-1 md:grid-cols-2 ml-13">
                 <InfoTag icon={Tag} label="Prefix" value={lookupResult.rangeData.prefix}/>
                 <InfoTag icon={Info} label="Purpose" value={lookupResult.rangeData.purpose}/>
                 <InfoTag icon={User} label="From" value={lookupResult.rangeData.from}/>
