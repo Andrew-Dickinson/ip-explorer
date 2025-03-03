@@ -15,6 +15,7 @@ import {IpsForNN} from "@/components/cards/ips-for-nn";
 import {IcmpReachability} from "@/components/cards/icmp-reachability";
 import {Card, CardContent} from "@/components/ui/card";
 import {TcpConnectivity} from "@/components/cards/tcp-connectivity";
+import {SnmpInfo} from "@/components/cards/snmp-info";
 
 
 export default function Home() {
@@ -73,6 +74,7 @@ export default function Home() {
                     ipAddress={parsedAddress}
                     ports={[22, 80, 443]}
                   />
+                  <SnmpInfo ipAddress={parsedAddress}/>
                 </>
                 :
                 <></>

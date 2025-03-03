@@ -21,9 +21,13 @@
     "clsx": "^2.1.1",
     "ipaddr.js": "^2.2.0",
     "lucide-react": "^0.475.0",
+    "moment": "^2.30.1",
+    "moment-interval": "^0.2.1",
+    "net-snmp": "^3.19.0",
     "next": "15.2.0-canary.70",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "snmp-sysobjectid": "^1.0.4",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
     "util": "^0.12.5"
