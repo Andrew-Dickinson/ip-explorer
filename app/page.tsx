@@ -16,6 +16,7 @@ import {IcmpReachability} from "@/components/cards/icmp-reachability";
 import {Card, CardContent} from "@/components/ui/card";
 import {TcpConnectivity} from "@/components/cards/tcp-connectivity";
 import {SnmpInfo} from "@/components/cards/snmp-info";
+import {OspfLookup} from "@/components/cards/ospf-lookup";
 
 
 export default function Home() {
@@ -75,6 +76,7 @@ export default function Home() {
                     ports={[22, 80, 443]}
                   />
                   <SnmpInfo ipAddress={parsedAddress}/>
+                  <OspfLookup ipAddress={parsedAddress}/>
                 </>
                 :
                 <></>
