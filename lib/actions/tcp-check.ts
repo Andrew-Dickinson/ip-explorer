@@ -20,7 +20,7 @@ export interface TcpConnectivityResult {
  * @param timeout Timeout in milliseconds
  * @returns Object containing connectivity status and latency
  */
-async function checkSinglePort(ipAddress: string, port: number, timeout = 3000): Promise<TcpCheckResult> {
+async function checkSinglePort(ipAddress: string, port: number, timeout = 2000): Promise<TcpCheckResult> {
   return new Promise((resolve) => {
     const socket = new Socket()
     let isDone = false

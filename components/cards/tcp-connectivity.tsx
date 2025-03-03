@@ -56,12 +56,13 @@ export function TcpConnectivity({
       <CardContent>
         <div className="space-y-4">
           {isLoading ? (
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-10 w-10 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-[100px]" />
-                <Skeleton className="h-4 w-[80px]" />
-              </div>
+            <div className="space-y-4">
+              { ports.map((_, i) =>
+                <div key={i} className="flex items-center gap-3">
+                  <Skeleton className="flex-none h-8 w-8 rounded-full" />
+                  <Skeleton className="flex-1 h-4" />
+                </div>
+              )}
             </div>
           ) : error ? (
             <div className="flex items-center gap-3">

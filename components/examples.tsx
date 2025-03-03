@@ -1,4 +1,4 @@
-import {IpExplainerCard} from "@/components/ui/cards/ip-explainer";
+import {IpExplainerCard} from "@/components/cards/ip-explainer";
 import {AddressProvenance, AddressType, StaticAddressCategory} from "@/lib/types";
 
 

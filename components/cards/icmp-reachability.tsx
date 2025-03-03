@@ -58,7 +58,7 @@ export function IcmpReachability({
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-[100px]" />
-                  <Skeleton className="h-4 w-[80px]" />
+                  <Skeleton className="h-4 w-[180px]" />
                 </div>
               </>
             ) : error ? (
