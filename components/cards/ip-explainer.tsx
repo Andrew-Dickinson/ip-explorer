@@ -371,7 +371,10 @@ export function IpExplainerCard({
                 <Hash className="h-4 w-4" />
                 Network Number
               </h4>
-              <p>{networkNumber}</p>
+              <a href={`https://map.nycmesh.net/nodes/${networkNumber}`}
+                 target={"_blank"}>
+                {networkNumber}
+              </a>
             </div>
           </> : <></>
         }
