@@ -2,6 +2,7 @@
 
 import { IPv4, parseCIDR } from "ipaddr.js"
 import { google } from "googleapis"
+import {createParallelAction} from "next-server-actions-parallel";
 
 
 export interface IpRangeData {
@@ -115,7 +116,7 @@ async function fetchIpRangeData(): Promise<IpRangeData[]> {
  * @param ipAddress The IP address to check
  * @returns Object containing information about the matching range if found
  */
-export async function checkIpRange(ipAddress: string): Promise<IpRangeLookupResult> {
+async function checkIpRangeInner(ipAddress: string): Promise<IpRangeLookupResult> {
   // Validate IP address format
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {
     throw new Error("Invalid IP address format")
@@ -159,3 +160,4 @@ export async function checkIpRange(ipAddress: string): Promise<IpRangeLookupResu
   }
 }
 
+export const checkIpRange = createParallelAction(checkIpRangeInner);

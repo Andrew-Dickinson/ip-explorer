@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { CloudAlert, Server } from "lucide-react"
 import {performSnmpQuery, SnmpError, type SnmpQueryResult, SnmpResult} from "@/lib/actions/snmp-query"
 import type { IPv4 } from "ipaddr.js"
+import {runParallelAction} from "next-server-actions-parallel";
 
 export interface SnmpInfoCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -33,7 +34,7 @@ export function SnmpInfo({
     const fetchSnmpInfo = async () => {
       try {
         setIsLoading(true)
-        const result = await performSnmpQuery(ipAddress.toString())
+        const result = await runParallelAction(performSnmpQuery(ipAddress.toString()));
         setSnmpResult(result)
         setError(null)
       } catch (err) {

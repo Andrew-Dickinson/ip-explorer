@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {Clock, CloudAlert, ArrowUpDown, Activity} from "lucide-react"
 import {checkIcmpReachability, PingResult} from "@/lib/actions/ping"
 import {IPv4} from "ipaddr.js";
+import {runParallelAction} from "next-server-actions-parallel";
 
 export interface IcmpReachabilityCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -30,7 +31,7 @@ export function IcmpReachability({
     const checkReachability = async () => {
       try {
         setIsLoading(true)
-        const result = await checkIcmpReachability(ipAddress.toString());
+        const result = await runParallelAction(checkIcmpReachability(ipAddress.toString()));
         setPingResult(result);
         setError(null)
       } catch (err) {

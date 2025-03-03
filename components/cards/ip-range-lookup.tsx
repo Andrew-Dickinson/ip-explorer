@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {AlertTriangle, Info, Tag, User, Layers, FileText, Table2, Check, X} from "lucide-react"
 import { checkIpRange, type IpRangeLookupResult } from "@/lib/actions/ip-ranges-sheet"
 import type { IPv4 } from "ipaddr.js"
+import {runParallelAction} from "next-server-actions-parallel";
 
 export interface IpRangeLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -29,7 +30,7 @@ export function IpRangeLookup({
     const checkRange = async () => {
       try {
         setIsLoading(true)
-        const result = await checkIpRange(ipAddress.toString())
+        const result = await runParallelAction(checkIpRange(ipAddress.toString()))
         setLookupResult(result)
         setError(null)
       } catch (err) {

@@ -9,6 +9,7 @@ import {checkTcpConnectivity, type TcpConnectivityResult} from "@/lib/actions/tc
 import type {IPv4} from "ipaddr.js"
 import {Badge} from "@/components/ui/badge"
 import {PortStatus} from "@/lib/types";
+import {runParallelAction} from "next-server-actions-parallel";
 
 export interface TcpConnectivityCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -33,7 +34,7 @@ export function TcpConnectivity({
     const checkConnectivity = async () => {
       try {
         setIsLoading(true)
-        const result = await checkTcpConnectivity(ipAddress.toString(), ports)
+        const result = await runParallelAction(checkTcpConnectivity(ipAddress.toString(), ports));
         setTcpResults(result)
         setError(null)
       } catch (err) {

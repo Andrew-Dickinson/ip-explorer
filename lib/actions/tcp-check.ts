@@ -3,6 +3,7 @@ import { Socket } from "net"
 import { IPv4 } from "ipaddr.js"
 import { analyzeStatic } from "@/lib/analyzers/static"
 import { PortStatus } from "../types"
+import {createParallelAction} from "next-server-actions-parallel";
 
 export interface TcpCheckResult {
   port: number
@@ -72,7 +73,7 @@ async function checkSinglePort(ipAddress: string, port: number, timeout = 2000):
  * @param ports Array of ports to check
  * @returns Object containing results for all ports
  */
-export async function checkTcpConnectivity(ipAddress: string, ports: number[]): Promise<TcpConnectivityResult> {
+async function checkTcpConnectivityInner(ipAddress: string, ports: number[]): Promise<TcpConnectivityResult> {
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {
     throw new Error("Invalid IP address format")
   }
@@ -93,3 +94,4 @@ export async function checkTcpConnectivity(ipAddress: string, ports: number[]): 
   }
 }
 
+export const checkTcpConnectivity = createParallelAction(checkTcpConnectivityInner);

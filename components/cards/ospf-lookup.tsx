@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Network, Router, AlertTriangle } from "lucide-react"
 import { checkOspfAdvertisement, type OspfLookupResult } from "@/lib/actions/ospf"
 import type { IPv4 } from "ipaddr.js"
+import {runParallelAction} from "next-server-actions-parallel";
 
 export interface OspfLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -31,7 +32,7 @@ export function OspfLookup({
     const checkAdvertisement = async () => {
       try {
         setIsLoading(true)
-        const result = await checkOspfAdvertisement(ipAddress.toString())
+        const result = await runParallelAction(checkOspfAdvertisement(ipAddress.toString()));
         setLookupResult(result)
         setError(null)
       } catch (err) {

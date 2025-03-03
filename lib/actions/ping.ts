@@ -4,6 +4,7 @@ import {exec} from "child_process"
 import {promisify} from "util"
 import {IPv4} from "ipaddr.js";
 import {analyzeStatic} from "@/lib/analyzers/static";
+import {createParallelAction} from "next-server-actions-parallel";
 
 const execAsync = promisify(exec)
 
@@ -24,7 +25,7 @@ const isExecError = (err: unknown): err is Error & { stdout: string } => {
  * @param ipAddress The IP address to ping
  * @returns Object containing reachability status and latency information
  */
-export async function checkIcmpReachability(ipAddress: string): Promise<PingResult> {
+async function checkIcmpReachabilityInner(ipAddress: string): Promise<PingResult> {
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {
     throw new Error("Invalid IP address format")
   }
@@ -74,3 +75,5 @@ export async function checkIcmpReachability(ipAddress: string): Promise<PingResu
     throw new Error("Unexpected error parsing ping output");
   }
 }
+
+export const checkIcmpReachability = createParallelAction(checkIcmpReachabilityInner);

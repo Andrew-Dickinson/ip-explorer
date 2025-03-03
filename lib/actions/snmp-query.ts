@@ -6,6 +6,7 @@ import { analyzeStatic } from "@/lib/analyzers/static"
 import snmp from "net-snmp"
 import { getDeviceInfo } from "snmp-sysobjectid"
 import moment from "moment";
+import {createParallelAction} from "next-server-actions-parallel";
 
 const SNMP_COMMUNITY = "public";
 
@@ -109,7 +110,7 @@ function parseSnmpValue(varbind: snmp.VarBind): { value: string | number | boole
  * @param oids Array of OIDs to query
  * @returns Object containing the query results
  */
-export async function performSnmpQuery(
+async function performSnmpQueryInner(
   ipAddress: string,
 ): Promise<SnmpQueryResult> {
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {
@@ -124,7 +125,7 @@ export async function performSnmpQuery(
   try {
     session = snmp.createSession(ipAddress, SNMP_COMMUNITY, {
       version: snmp.Version1,
-      timeout: 1000,
+      timeout: 1500,
       retries: 1,
     })
 
@@ -198,3 +199,4 @@ export async function performSnmpQuery(
   }
 }
 
+export const performSnmpQuery = createParallelAction(performSnmpQueryInner);

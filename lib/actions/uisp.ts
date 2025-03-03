@@ -5,6 +5,7 @@ import {fetch, Agent} from "undici";
 import UISP_CERT from "@/lib/certificates/uisp.mesh.nycmesh.net.pem";
 import {UISP_API_URL} from "@/lib/constants";
 import {isUispDeviceArray, UispDevice} from "@/types/uisp";
+import {createParallelAction} from "next-server-actions-parallel";
 
 
 /**
@@ -64,7 +65,7 @@ export interface UispDeviceResult {
  * @param ipAddress The IP address to search for
  * @returns Array of devices matching the IP address
  */
-export async function lookupUispDeviceByIp(ipAddress: string): Promise<UispDeviceResult[]> {
+async function lookupUispDeviceByIpInner(ipAddress: string): Promise<UispDeviceResult[]> {
   // Validate IP address format
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {
     throw new Error("Invalid IP address format")
@@ -143,3 +144,4 @@ export async function lookupUispDeviceByIp(ipAddress: string): Promise<UispDevic
   }
 }
 
+export const lookupUispDeviceByIp = createParallelAction(lookupUispDeviceByIpInner);

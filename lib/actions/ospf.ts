@@ -1,6 +1,7 @@
 "use server"
 
 import { IPv4, parseCIDR } from "ipaddr.js"
+import {createParallelAction} from "next-server-actions-parallel";
 
 const OSPF_ENDPOINT= "https://api.andrew.mesh.nycmesh.net/api/v1/mesh_ospf_data.json";
 
@@ -36,7 +37,7 @@ interface OspfData {
  * @param ipAddress The IP address to check
  * @returns Object containing information about the advertisement
  */
-export async function checkOspfAdvertisement(ipAddress: string): Promise<OspfLookupResult> {
+async function checkOspfAdvertisementInner(ipAddress: string): Promise<OspfLookupResult> {
   try {
     // Validate IP address format
     if (!IPv4.isValidFourPartDecimal(ipAddress)) {
@@ -112,3 +113,4 @@ export async function checkOspfAdvertisement(ipAddress: string): Promise<OspfLoo
   }
 }
 
+export const checkOspfAdvertisement = createParallelAction(checkOspfAdvertisementInner);
