@@ -65,7 +65,7 @@ export function IpRangeLookup({
               <AlertTriangle className="h-5 w-5 text-amber-600" />
             </div>
             <div className="space-y-1">
-              <p className="font-medium">Error Checking IP Range</p>
+              <p className="font-medium">Error Checking IPRanges Sheet</p>
               <p className="text-sm text-muted-foreground">{error}</p>
             </div>
           </div>

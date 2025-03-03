@@ -75,7 +75,7 @@ export function UispLookup({
               <AlertTriangle className="h-5 w-5 text-amber-600" />
             </div>
             <div className="space-y-1">
-              <p className="font-medium">Error Looking Up Device</p>
+              <p className="font-medium">Error Looking Up Device in UISP</p>
               <p className="text-sm text-muted-foreground">{error}</p>
             </div>
           </div>
