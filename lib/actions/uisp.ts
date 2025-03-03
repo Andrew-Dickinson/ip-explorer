@@ -139,7 +139,7 @@ export async function lookupUispDeviceByIp(ipAddress: string): Promise<UispDevic
     }))
   } catch (error) {
     console.error("Error looking up UISP device:", error)
-    throw error
+    throw new Error("Error looking up UISP device, check logs");
   }
 }
 
