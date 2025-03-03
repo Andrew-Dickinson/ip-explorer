@@ -17,6 +17,7 @@ import {Card, CardContent} from "@/components/ui/card";
 import {TcpConnectivity} from "@/components/cards/tcp-connectivity";
 import {SnmpInfo} from "@/components/cards/snmp-info";
 import {OspfLookup} from "@/components/cards/ospf-lookup";
+import {UispLookup} from "@/components/cards/uisp-lookup";
 
 
 export default function Home() {
@@ -77,6 +78,7 @@ export default function Home() {
                   />
                   <SnmpInfo ipAddress={parsedAddress}/>
                   <OspfLookup ipAddress={parsedAddress}/>
+                  <UispLookup ipAddress={parsedAddress} />
                 </>
                 :
                 <></>

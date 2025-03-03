@@ -30,6 +30,7 @@
     "snmp-sysobjectid": "^1.0.4",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
+    "undici": "^7.4.0",
     "util": "^0.12.5"
   },
   "devDependencies": {
