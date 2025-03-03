@@ -8,6 +8,7 @@ import { AlertTriangle, Wifi, Server } from "lucide-react"
 import { lookupUispDeviceByIp, type UispDeviceResult } from "@/lib/actions/uisp"
 import {IPv4} from "ipaddr.js";
 import {UISP_URL} from "@/lib/constants";
+import {runParallelAction} from "next-server-actions-parallel";
 
 export interface UispLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -30,7 +31,7 @@ export function UispLookup({
     const lookupDevice = async () => {
       try {
         setIsLoading(true)
-        const result = await lookupUispDeviceByIp(ipAddress.toString())
+        const result = await runParallelAction(lookupUispDeviceByIp(ipAddress.toString()));
         setDevices(result)
         setError(null)
       } catch (err) {

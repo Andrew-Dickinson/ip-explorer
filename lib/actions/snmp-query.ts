@@ -155,19 +155,19 @@ async function performSnmpQueryInner(
 
           results.push({
             oid: oid + "-manf",
-            value: lookupResult ? lookupResult.vendor : `${varbind.value.toString()} (Unknown)`,
+            value: lookupResult.vendor ? lookupResult.vendor : `${varbind.value.toString()} (Unknown)`,
             type: "OctetString",
             displayName: "Manufacturer"
           });
           results.push({
             oid: oid + "-model",
-            value: lookupResult ? lookupResult.model : `${varbind.value.toString()} (Unknown)`,
+            value: lookupResult.model ? lookupResult.model : `Unknown (${varbind.value.toString()})`,
             type: "OctetString",
             displayName: "Model (Unreliable)"
           });
           results.push({
             oid: oid + "-type",
-            value: lookupResult ? lookupResult.category : `${varbind.value.toString()} (Unknown)`,
+            value: lookupResult.category ? lookupResult.category : `Unknown (${varbind.value.toString()})`,
             type: "OctetString",
             displayName: "Device Category"
           });
