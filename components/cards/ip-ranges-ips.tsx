@@ -4,8 +4,8 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import {AlertTriangle, Info, Tag, User, Layers, FileText, Table2, Check, X} from "lucide-react"
-import { checkIpRange, type IpRangeLookupResult } from "@/lib/actions/ip-ranges-sheet"
+import {AlertTriangle, Info, Tag, User, Layers, FileText, Table2} from "lucide-react"
+import { checkIpRange, type IpRangeLookupResult } from "@/lib/actions/ip-ranges-ips"
 import type { IPv4 } from "ipaddr.js"
 import {runParallelAction} from "next-server-actions-parallel";
 
@@ -15,9 +15,9 @@ export interface IpRangeLookupCardProps extends React.ComponentProps<"div"> {
   description?: string
 }
 
-export function IpRangeLookup({
+export function IpRangesIps({
   ipAddress,
-  title = "IPRanges Google Sheet Lookup",
+  title = "IPRanges Google Sheet Lookup - IPs",
   description = "Searches the IPRanges spreadsheet to see if this address falls into any of the static ranges defined there",
   className,
   ...props

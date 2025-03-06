@@ -61,7 +61,7 @@ async function fetchIpRangeData(): Promise<IpRangeData[]> {
   try {
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.IP_RANGES_SHEET_ID,
-      range: "IPs!A:I", // Assuming the data is in the "IPs" sheet, columns A through I
+      range: "IPs!A:I",
     })
 
     const rows = response.data.values
