@@ -2,14 +2,14 @@
 import {IPExplainerExamples} from "@/components/examples";
 import {Input} from "@/components/ui/input";
 import {IpExplainerCard} from "@/components/cards/ip-explainer";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {IPv4} from "ipaddr.js";
 import {analyzeStatic} from "@/lib/analyzers/static";
 import {NNIPsResult, StaticAnalysisResult} from "@/lib/types";
 import {Button} from "@/components/ui/button";
 import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger} from "@/components/ui/sheet";
 import {ScrollArea} from "@/components/ui/scroll-area";
-import {ArrowRight, Ban, Lightbulb} from "lucide-react";
+import {ArrowRight, Ban, Lightbulb, RefreshCcw} from "lucide-react";
 import {nnIps} from "@/lib/analyzers/nn-ips";
 import {IpsForNN} from "@/components/cards/ips-for-nn";
 import {IcmpReachability} from "@/components/cards/icmp-reachability";
@@ -21,28 +21,51 @@ import {UispLookup} from "@/components/cards/uisp-lookup";
 import {IpRangesIps} from "@/components/cards/ip-ranges-ips";
 import {IpRangesHosts} from "@/components/cards/ip-ranges-hosts";
 import {DnsLookup} from "@/components/cards/dns-lookup";
+import {checkOspfAdvertisement, OspfLookupResult} from "@/lib/actions/ospf";
+import {runParallelAction} from "next-server-actions-parallel";
 
+const TCP_PORTS_TO_SCAN = [22, 80, 443];
 
 export default function Home() {
   const [inputAddress, setInputAddress] = useState<string>("");
-  const [analysisAddress, setAnalysisAddress] = useState<string>("");
+  const inputAddressValid = IPv4.isValidFourPartDecimal(inputAddress);
 
-  const addressValid = IPv4.isValidFourPartDecimal(inputAddress);
-  let parsedAddress: IPv4 | undefined = undefined;
-  let staticResult: StaticAnalysisResult | undefined = undefined;
-  let nnIPsResult: NNIPsResult | undefined = undefined;
+  const [parsedAddress, setParsedAddress] = useState<IPv4 | null>();
 
-  const showResults = inputAddress && inputAddress == analysisAddress;
-  if (showResults) {
-    try {
-      parsedAddress = IPv4.parse(analysisAddress);
-      staticResult = analyzeStatic(parsedAddress);
-      if (staticResult.networkNumber) {
-        nnIPsResult = nnIps(staticResult.networkNumber);
+  const [staticResult, setStaticResult] = useState<StaticAnalysisResult | null>();
+  const [nnIPsResult, setNnnIPsResult] = useState<NNIPsResult | null>();
+
+  const [ospfQueryLoading, setIsLoading] = useState(true)
+  const [ospfLookupResult, setLookupResult] = useState<OspfLookupResult | null>(null)
+  const [ospfError, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (parsedAddress) {
+      try {
+          const res = analyzeStatic(parsedAddress);
+          if (res.networkNumber) {
+            setNnnIPsResult(nnIps(res.networkNumber));
+          }
+          setStaticResult(res);
+      } catch {}
+
+      const checkAdvertisement = async () => {
+        try {
+          setIsLoading(true)
+          const result = await runParallelAction(checkOspfAdvertisement(parsedAddress.toString()));
+          setLookupResult(result)
+          setError(null)
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Unknown error")
+          setLookupResult(null)
+        } finally {
+          setIsLoading(false)
+        }
       }
-    } catch {
-    }
+
+    checkAdvertisement()
   }
+  }, [parsedAddress]);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 sm:px-20 font-[family-name:var(--font-geist-sans)]">
@@ -58,30 +81,32 @@ export default function Home() {
                 value={inputAddress}
                 onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setInputAddress(e.target.value);
-                  setAnalysisAddress("");
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && addressValid) setAnalysisAddress(inputAddress);
+                  if (e.key === 'Enter' && inputAddressValid) setParsedAddress(IPv4.parse(inputAddress));
                 }}
               />
               <Button variant={"default"}
-                      icon={ArrowRight}
-                      disabled={!addressValid}
-                      onClick={() => setAnalysisAddress(inputAddress)}/>
+                      icon={!inputAddressValid || inputAddress !== parsedAddress?.toString() ? ArrowRight : RefreshCcw}
+                      disabled={!inputAddressValid}
+                      onClick={() => setParsedAddress(IPv4.parse(inputAddress))}/>
             </div>
             {
-              parsedAddress !== undefined && staticResult?.addressProvenance !== undefined ?
+              parsedAddress && staticResult?.addressProvenance !== undefined ?
                 <>
                   <IcmpReachability
                     ipAddress={parsedAddress}
                   />
                   <TcpConnectivity
                     ipAddress={parsedAddress}
-                    ports={[22, 80, 443]}
+                    ports={TCP_PORTS_TO_SCAN}
                   />
                   <DnsLookup ipAddress={parsedAddress}/>
                   <SnmpInfo ipAddress={parsedAddress}/>
-                  <OspfLookup ipAddress={parsedAddress}/>
+                  <OspfLookup ipAddress={parsedAddress}
+                              isLoading={ospfQueryLoading}
+                              lookupResult={ospfLookupResult}
+                              error={ospfError}/>
                   <UispLookup ipAddress={parsedAddress} />
                   <IpRangesIps ipAddress={parsedAddress}/>
                   <IpRangesHosts ipAddress={parsedAddress}/>
@@ -90,7 +115,7 @@ export default function Home() {
                 <></>
             }
             {
-              !showResults &&
+              !parsedAddress &&
               <Sheet>
                 <SheetTrigger asChild><Button variant={"secondary"} icon={Lightbulb}>Examples</Button></SheetTrigger>
                 <SheetContent className="w-[100vw] sm:max-w-2xl">
@@ -108,7 +133,7 @@ export default function Home() {
             { staticResult ?
               <IpExplainerCard {...staticResult}/>
               :
-              showResults && <Card className={"max-w-lg"}>
+              parsedAddress && <Card className={"max-w-lg"}>
                 <CardContent>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-5">

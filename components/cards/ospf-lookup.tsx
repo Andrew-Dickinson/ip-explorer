@@ -1,18 +1,19 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Network, Router, AlertTriangle } from "lucide-react"
-import { checkOspfAdvertisement, type OspfLookupResult } from "@/lib/actions/ospf"
+import { type OspfLookupResult } from "@/lib/actions/ospf"
 import type { IPv4 } from "ipaddr.js"
-import {runParallelAction} from "next-server-actions-parallel";
 
 export interface OspfLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
   title?: string
   description?: string
+  isLoading: boolean
+  lookupResult: OspfLookupResult | null,
+  error: string | null
 }
 
 const NODE_EXPLORER_PREFIX = "https://node-explorer.andrew.mesh.nycmesh.net/explorer?router=";
@@ -22,30 +23,11 @@ export function OspfLookup({
   title = "OSPF Advertisement",
   description = "Checks if this IP address is advertised in the OSPF table and which router is advertising it",
   className,
+  isLoading,
+  error,
+  lookupResult,
   ...props
 }: OspfLookupCardProps) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [lookupResult, setLookupResult] = useState<OspfLookupResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const checkAdvertisement = async () => {
-      try {
-        setIsLoading(true)
-        const result = await runParallelAction(checkOspfAdvertisement(ipAddress.toString()));
-        setLookupResult(result)
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error")
-        setLookupResult(null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    checkAdvertisement()
-  }, [ipAddress])
-
   return (
     <Card className={className} {...props}>
       <CardHeader>
