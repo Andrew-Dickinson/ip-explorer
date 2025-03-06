@@ -20,6 +20,7 @@ import {OspfLookup} from "@/components/cards/ospf-lookup";
 import {UispLookup} from "@/components/cards/uisp-lookup";
 import {IpRangesIps} from "@/components/cards/ip-ranges-ips";
 import {IpRangesHosts} from "@/components/cards/ip-ranges-hosts";
+import {DnsLookup} from "@/components/cards/dns-lookup";
 
 
 export default function Home() {
@@ -78,6 +79,7 @@ export default function Home() {
                     ipAddress={parsedAddress}
                     ports={[22, 80, 443]}
                   />
+                  <DnsLookup ipAddress={parsedAddress}/>
                   <SnmpInfo ipAddress={parsedAddress}/>
                   <OspfLookup ipAddress={parsedAddress}/>
                   <UispLookup ipAddress={parsedAddress} />
