@@ -1,12 +1,25 @@
 "use server"
 
-import {IPv4} from "ipaddr.js";
-import {fetch, Agent} from "undici";
-import UISP_CERT from "@/lib/certificates/uisp.mesh.nycmesh.net.pem";
-import {UISP_API_URL} from "@/lib/constants";
-import {isUispDeviceArray, UispDevice} from "@/types/uisp";
-import {createParallelAction} from "next-server-actions-parallel";
+import { IPv4 } from "ipaddr.js"
+import { fetch, Agent } from "undici"
+import UISP_CERT from "@/lib/certificates/uisp.mesh.nycmesh.net.pem"
+import { UISP_API_URL } from "@/lib/constants"
+import { isUispDeviceArray, type UispDevice } from "@/types/uisp"
+import { createParallelAction } from "next-server-actions-parallel"
 
+// Cache structure for device data
+interface DeviceCache {
+  devices: UispDevice[] | null
+  lastFetched: number
+}
+
+let deviceCache: DeviceCache = {
+  devices: null,
+  lastFetched: 0,
+}
+
+// Cache duration (10 minutes in milliseconds)
+const CACHE_DURATION = 10 * 60 * 1000
 
 /**
  * Authenticates with UISP API
@@ -61,6 +74,51 @@ export interface UispDeviceResult {
 }
 
 /**
+ * Fetches all devices from UISP API
+ * @returns Array of all UISP devices
+ */
+async function fetchUispDevices(): Promise<UispDevice[]> {
+  const now = Date.now()
+
+  // If device cache is valid, return cached devices
+  if (deviceCache.devices && now - deviceCache.lastFetched < CACHE_DURATION) {
+    return deviceCache.devices
+  }
+
+  if (!process.env.UISP_USER || !process.env.UISP_PASSWORD) throw new Error("UISP credentials not set");
+
+  // If cache is expired or empty, fetch new data
+  const response = await fetch(`${UISP_API_URL}/devices`, {
+    headers: {
+      Accept: "application/json",
+      "x-auth-token": await loginToUISP(process.env.UISP_USER, process.env.UISP_PASSWORD),
+    },
+    dispatcher: new Agent({
+      connect: {
+        ca: UISP_CERT,
+      },
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch UISP devices: ${response.status} ${response.statusText}`)
+  }
+
+  const devices = await response.json();
+  if (!isUispDeviceArray(devices)) {
+    throw new Error("Invalid data structure")
+  }
+
+  // Update device cache
+  deviceCache = {
+    devices,
+    lastFetched: now,
+  }
+
+  return devices
+}
+
+/**
  * Looks up UISP devices by IP address
  * @param ipAddress The IP address to search for
  * @returns Array of devices matching the IP address
@@ -71,30 +129,9 @@ async function lookupUispDeviceByIpInner(ipAddress: string): Promise<UispDeviceR
     throw new Error("Invalid IP address format")
   }
 
-  if (!process.env.UISP_USER || !process.env.UISP_PASSWORD) throw new Error("UISP credentials not set");
-
   try {
-    // Fetch devices from UISP API
-    const response = await fetch(`${UISP_API_URL}/devices`, {
-      headers: {
-        Accept: "application/json",
-        "x-auth-token": await loginToUISP(process.env.UISP_USER, process.env.UISP_PASSWORD)
-      },
-      dispatcher: new Agent({
-        connect: {
-          ca: UISP_CERT,
-        }
-      })
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch UISP devices: ${response.status} ${response.statusText}`)
-    }
-
-    const devices = await response.json();
-    if (!isUispDeviceArray(devices)) {
-      throw new Error("Invalid data structure")
-    }
+    // Fetch devices from UISP API (using cache if available)
+    const devices = await fetchUispDevices()
 
     // Filter devices by IP address
     const matchingDevices: UispDevice[] = devices.filter((device: UispDevice) => {
