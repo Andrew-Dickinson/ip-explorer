@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {AlertTriangle, Globe} from "lucide-react"
 import { performReverseDnsLookup, type DnsLookupResult } from "@/lib/actions/dns-lookup"
 import type { IPv4 } from "ipaddr.js"
+import {runParallelAction} from "next-server-actions-parallel";
 
 export interface DnsLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -29,7 +30,7 @@ export function DnsLookup({
     const lookupHostname = async () => {
       try {
         setIsLoading(true)
-        const result = await performReverseDnsLookup(ipAddress.toString())
+        const result = await runParallelAction(performReverseDnsLookup(ipAddress.toString()));
         setDnsResult(result)
         setError(null)
       } catch (err) {

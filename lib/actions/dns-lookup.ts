@@ -4,6 +4,7 @@ import { promisify } from "util"
 import { IPv4 } from "ipaddr.js"
 import { analyzeStatic } from "@/lib/analyzers/static"
 import dns from "dns"
+import {createParallelAction} from "next-server-actions-parallel";
 
 
 const MESH_AUTHORITATIVE_DNS_SERVER_ADDRESS = "23.158.16.23";
@@ -25,7 +26,7 @@ export interface DnsLookupResult {
  * @param ipAddress The IP address to look up
  * @returns Object containing the hostname if found
  */
-export async function performReverseDnsLookup(ipAddress: string): Promise<DnsLookupResult> {
+export async function performReverseDnsLookupInner(ipAddress: string): Promise<DnsLookupResult> {
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {
     throw new Error("Invalid IP address format")
   }
@@ -60,3 +61,5 @@ export async function performReverseDnsLookup(ipAddress: string): Promise<DnsLoo
   }
 }
 
+
+export const performReverseDnsLookup = createParallelAction(performReverseDnsLookupInner);
