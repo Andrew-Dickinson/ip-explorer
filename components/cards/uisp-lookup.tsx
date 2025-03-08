@@ -82,8 +82,8 @@ export function UispLookup({
           </div>
         ) : devices.length === 0 ? (
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-amber-100 flex flex-none items-center justify-center">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <div className="h-10 w-10 rounded-full bg-gray-100 flex flex-none items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-gray-600" />
             </div>
             <div className="space-y-1">
               <p className="font-medium">No Devices Found</p>

@@ -5,7 +5,7 @@ import {IpExplainerCard} from "@/components/cards/ip-explainer";
 import React, {useEffect, useState} from "react";
 import {IPv4} from "ipaddr.js";
 import {analyzeStatic} from "@/lib/analyzers/static";
-import {NNIPsResult, StaticAnalysisResult} from "@/lib/types";
+import {AddressType, NNIPsResult, StaticAnalysisResult} from "@/lib/types";
 import {Button} from "@/components/ui/button";
 import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger} from "@/components/ui/sheet";
 import {ScrollArea} from "@/components/ui/scroll-area";
@@ -23,6 +23,7 @@ import {IpRangesHosts} from "@/components/cards/ip-ranges-hosts";
 import {DnsLookup} from "@/components/cards/dns-lookup";
 import {checkOspfAdvertisement, OspfLookupResult} from "@/lib/actions/ospf";
 import {runParallelAction} from "next-server-actions-parallel";
+import {DhcpLeaseLookup} from "@/components/cards/routeros-info";
 
 const TCP_PORTS_TO_SCAN = [22, 80, 443];
 
@@ -81,6 +82,7 @@ export default function Home() {
                 value={inputAddress}
                 onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setInputAddress(e.target.value);
+                  if (e.target.value === "") { setParsedAddress(null); }
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && inputAddressValid) setParsedAddress(IPv4.parse(inputAddress));
@@ -110,6 +112,9 @@ export default function Home() {
                   <UispLookup ipAddress={parsedAddress} />
                   <IpRangesIps ipAddress={parsedAddress}/>
                   <IpRangesHosts ipAddress={parsedAddress}/>
+                  { ospfLookupResult?.routerIds && [AddressType.STATIC_10_70, AddressType.DHCP].includes(staticResult.addressType) ?
+                    <DhcpLeaseLookup ipAddress={parsedAddress} ospfResult={ospfLookupResult}/> : null
+                  }
                 </>
                 :
                 <></>
@@ -130,7 +135,7 @@ export default function Home() {
                 </SheetContent>
               </Sheet>
             }
-            { staticResult ?
+            { parsedAddress && staticResult ?
               <IpExplainerCard {...staticResult}/>
               :
               parsedAddress && <Card className={"max-w-lg"}>
@@ -152,7 +157,7 @@ export default function Home() {
                 </CardContent>
                 </Card>
             }
-            {staticResult && staticResult.networkNumber && nnIPsResult ?
+            {parsedAddress && staticResult && staticResult.networkNumber && nnIPsResult ?
               <IpsForNN
                 networkNumber={staticResult.networkNumber}
                 addresses={nnIPsResult.addresses}
