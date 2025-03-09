@@ -134,9 +134,8 @@ export function DhcpLeaseLookup({
                 </>
                 : null
               }
+              <InfoTag icon={FileText} label="Comment" value={lookupResult.leaseInfo.comment}/>
             </div>
-
-            <InfoTag icon={FileText} label="Comment" value={lookupResult.leaseInfo.comment}/>
           </div>
         ) : (
           <div className="flex items-center gap-3">
