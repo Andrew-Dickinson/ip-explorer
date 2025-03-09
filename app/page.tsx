@@ -40,6 +40,14 @@ export default function Home() {
   const [ospfLookupResult, setLookupResult] = useState<OspfLookupResult | null>(null)
   const [ospfError, setError] = useState<string | null>(null)
 
+  const resetState = () => {
+    setStaticResult(null);
+    setNnnIPsResult(null);
+    setIsLoading(false);
+    setError(null);
+    setLookupResult(null);
+  }
+
   useEffect(() => {
     if (parsedAddress) {
       try {
@@ -82,16 +90,24 @@ export default function Home() {
                 value={inputAddress}
                 onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setInputAddress(e.target.value);
-                  if (e.target.value === "") { setParsedAddress(null); }
+                  if (e.target.value === "") {
+                    setParsedAddress(null);
+                    resetState();
+                  }
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && inputAddressValid) setParsedAddress(IPv4.parse(inputAddress));
-                }}
+                  if (e.key === 'Enter' && inputAddressValid) {
+                    resetState();
+                    setParsedAddress(IPv4.parse(inputAddress));
+                }}}
               />
               <Button variant={"default"}
                       icon={!inputAddressValid || inputAddress !== parsedAddress?.toString() ? ArrowRight : RefreshCcw}
                       disabled={!inputAddressValid}
-                      onClick={() => setParsedAddress(IPv4.parse(inputAddress))}/>
+                      onClick={() => {
+                        resetState();
+                        setParsedAddress(IPv4.parse(inputAddress))
+                      }}/>
             </div>
             {
               parsedAddress && staticResult?.addressProvenance !== undefined ?
