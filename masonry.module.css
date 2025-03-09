@@ -1,0 +1,26 @@
+.masonry {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: space-between;
+  position: relative;
+}
+
+.masonryItem {
+  width: 100%;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .masonryItem {
+    width: calc(50% - 0.5rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .masonryItem {
+    width: calc(33.333% - 0.667rem);
+  }
+}
+
