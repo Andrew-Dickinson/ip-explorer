@@ -114,9 +114,16 @@ async function fetchIpRangeData(): Promise<IpRangeData[]> {
 /**
  * Checks if an IP address is within any of the ranges in the CSV data
  * @param ipAddress The IP address to check
+ * @param psk The pre-shared key to access this endpoint
  * @returns Object containing information about the matching range if found
  */
-async function checkIpRangeInner(ipAddress: string): Promise<IpRangeLookupResult> {
+async function checkIpRangeInner(ipAddress: string, psk: string): Promise<IpRangeLookupResult> {
+  // Validate PSK
+  if (psk !== process.env.SECURE_CONTENT_PSK) {
+    throw new Error("Invalid psk");
+  }
+
+
   // Validate IP address format
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {
     throw new Error("Invalid IP address format")

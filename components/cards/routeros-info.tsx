@@ -17,6 +17,9 @@ import { lookupDhcpLease, type DhcpLeaseLookupResult } from "@/lib/actions/route
 import type { OspfLookupResult } from "@/lib/actions/ospf"
 import type { IPv4 } from "ipaddr.js"
 import {runParallelAction} from "next-server-actions-parallel";
+import {PSK_STORAGE_KEY} from "@/lib/constants";
+import {useLocalStorage} from "@/lib/hooks/use-local-storage";
+import {SecureCard} from "@/components/cards/secure-card";
 
 export interface DhcpLeaseLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -33,48 +36,49 @@ export function DhcpLeaseLookup({
   className,
   ...props
 }: DhcpLeaseLookupCardProps) {
+  const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
+
   const [isLoading, setIsLoading] = useState(true)
   const [lookupResult, setLookupResult] = useState<DhcpLeaseLookupResult | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const checkLease = async () => {
-      try {
-        setIsLoading(true)
+    if (secureContentPSK) {
+      const checkLease = async () => {
+        try {
+          setIsLoading(true)
 
-        // Only proceed if we have a router ID from OSPF
-        if (ospfResult.routerIds.length !== 1) {
-          setError("No router ID available from OSPF lookup")
+          // Only proceed if we have a router ID from OSPF
+          if (ospfResult.routerIds.length !== 1) {
+            setError("No router ID available from OSPF lookup")
+            setLookupResult(null)
+            return
+          }
+
+          const result = await runParallelAction(
+            lookupDhcpLease(ipAddress.toString(), ospfResult, secureContentPSK)
+          );
+          setLookupResult(result)
+
+          if (!result.connectionSuccess) {
+            setError(result.error || "SSH Connection Failed")
+          } else {
+            setError(null)
+          }
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Unknown error")
           setLookupResult(null)
-          return
+        } finally {
+          setIsLoading(false)
         }
-
-        const result = await runParallelAction(lookupDhcpLease(ipAddress.toString(), ospfResult));
-        setLookupResult(result)
-
-        if (!result.connectionSuccess) {
-          setError(result.error || "SSH Connection Failed")
-        } else {
-          setError(null)
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error")
-        setLookupResult(null)
-      } finally {
-        setIsLoading(false)
       }
-    }
 
-    checkLease()
-  }, [ipAddress, ospfResult])
+      checkLease()
+    }
+  }, [ipAddress, ospfResult, secureContentPSK])
 
   return (
-    <Card className={className} {...props}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription className="text-xs">{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <SecureCard title={title} description={description} className={className} {...props}>
         {isLoading ? (
           <div className="flex items-center gap-3">
             <Skeleton className="h-10 w-10 rounded-full" />
@@ -148,8 +152,7 @@ export function DhcpLeaseLookup({
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+    </SecureCard>
   )
 }
 

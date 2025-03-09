@@ -2,13 +2,14 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AlertTriangle, Wifi, Server } from "lucide-react"
 import { lookupUispDeviceByIp, type UispDeviceResult } from "@/lib/actions/uisp"
 import {IPv4} from "ipaddr.js";
-import {UISP_URL} from "@/lib/constants";
+import {PSK_STORAGE_KEY, UISP_URL} from "@/lib/constants";
 import {runParallelAction} from "next-server-actions-parallel";
+import {SecureCard} from "@/components/cards/secure-card";
+import {useLocalStorage} from "@/lib/hooks/use-local-storage";
 
 export interface UispLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -23,35 +24,41 @@ export function UispLookup({
   className,
   ...props
 }: UispLookupCardProps) {
+  const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
+
   const [isLoading, setIsLoading] = useState(true)
   const [devices, setDevices] = useState<UispDeviceResult[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const lookupDevice = async () => {
-      try {
-        setIsLoading(true)
-        const result = await runParallelAction(lookupUispDeviceByIp(ipAddress.toString()));
-        setDevices(result)
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error")
-        setDevices([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  console.log(secureContentPSK);
 
-    lookupDevice()
-  }, [ipAddress])
+  useEffect(() => {
+    if (secureContentPSK) {
+      const lookupDevice = async () => {
+        try {
+          setIsLoading(true)
+          const result = await runParallelAction(
+            lookupUispDeviceByIp(ipAddress.toString(), secureContentPSK)
+          );
+          setDevices(result)
+          setError(null)
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Unknown error")
+          setDevices([])
+        } finally {
+          setIsLoading(false)
+        }
+      }
+
+      lookupDevice()
+    }
+  }, [ipAddress, secureContentPSK])
 
   return (
-    <Card className={className} {...props}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription className="text-xs">{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <SecureCard
+      title={title}
+      description={description}
+      className={className} {...props}>
         {isLoading ? (
           <div className="flex items-center gap-3">
             <Skeleton className="h-10 w-10 rounded-full"/>
@@ -136,8 +143,7 @@ export function UispLookup({
             ))}
           </div>
         )}
-      </CardContent>
-    </Card>
+    </SecureCard>
   )
 }
 

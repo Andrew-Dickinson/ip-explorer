@@ -8,6 +8,9 @@ import {AlertTriangle, Info, Tag, User, Layers, FileText, Table2} from "lucide-r
 import { checkIpRange, type IpRangeLookupResult } from "@/lib/actions/ip-ranges-ips"
 import type { IPv4 } from "ipaddr.js"
 import {runParallelAction} from "next-server-actions-parallel";
+import {PSK_STORAGE_KEY} from "@/lib/constants";
+import {useLocalStorage} from "@/lib/hooks/use-local-storage";
+import {SecureCard} from "@/components/cards/secure-card";
 
 export interface IpRangeLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -22,35 +25,36 @@ export function IpRangesIps({
   className,
   ...props
 }: IpRangeLookupCardProps) {
+  const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
+
   const [isLoading, setIsLoading] = useState(true)
   const [lookupResult, setLookupResult] = useState<IpRangeLookupResult | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const checkRange = async () => {
-      try {
-        setIsLoading(true)
-        const result = await runParallelAction(checkIpRange(ipAddress.toString()))
-        setLookupResult(result)
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error")
-        setLookupResult(null)
-      } finally {
-        setIsLoading(false)
+    if (secureContentPSK) {
+      const checkRange = async () => {
+        try {
+          setIsLoading(true)
+          const result = await runParallelAction(
+            checkIpRange(ipAddress.toString(), secureContentPSK)
+          )
+          setLookupResult(result)
+          setError(null)
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Unknown error")
+          setLookupResult(null)
+        } finally {
+          setIsLoading(false)
+        }
       }
-    }
 
-    checkRange()
-  }, [ipAddress])
+      checkRange()
+    }
+  }, [ipAddress, secureContentPSK])
 
   return (
-    <Card className={className} {...props}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription className="text-xs">{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <SecureCard title={title} description={description} className={className} {...props}>
         {isLoading ? (
           <div className="flex items-center gap-3">
             <Skeleton className="h-10 w-10 rounded-full" />
@@ -121,8 +125,7 @@ export function IpRangesIps({
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+    </SecureCard>
   )
 }
 

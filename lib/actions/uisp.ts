@@ -121,9 +121,15 @@ async function fetchUispDevices(): Promise<UispDevice[]> {
 /**
  * Looks up UISP devices by IP address
  * @param ipAddress The IP address to search for
+ * @param psk The pre-shared key to access this endpoint
  * @returns Array of devices matching the IP address
  */
-async function lookupUispDeviceByIpInner(ipAddress: string): Promise<UispDeviceResult[]> {
+async function lookupUispDeviceByIpInner(ipAddress: string, psk: string): Promise<UispDeviceResult[]> {
+  // Validate PSK
+  if (psk !== process.env.SECURE_CONTENT_PSK) {
+    throw new Error("Invalid psk");
+  }
+
   // Validate IP address format
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {
     throw new Error("Invalid IP address format")
