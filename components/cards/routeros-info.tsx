@@ -6,14 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   AlertTriangle,
-  CheckCircle,
-  Wifi,
   Clock,
   Server,
   Calendar,
   Activity,
   FileText,
-  CircleHelp,
   EthernetPort, ChevronsLeftRightEllipsis, Shrink, SquarePen
 } from "lucide-react"
 import { lookupDhcpLease, type DhcpLeaseLookupResult } from "@/lib/actions/routeros-ssh"
@@ -52,7 +49,7 @@ export function DhcpLeaseLookup({
           return
         }
 
-        const result = await lookupDhcpLease(ipAddress.toString(), ospfResult);
+        const result = await runParallelAction(lookupDhcpLease(ipAddress.toString(), ospfResult));
         setLookupResult(result)
 
         if (!result.success) {
@@ -70,8 +67,6 @@ export function DhcpLeaseLookup({
 
     checkLease()
   }, [ipAddress, ospfResult])
-
-  console.log(lookupResult)
 
   return (
     <Card className={className} {...props}>

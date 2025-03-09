@@ -6,6 +6,7 @@ import {analyzeStatic} from "@/lib/analyzers/static";
 import {get_dhcp_match} from "@/lib/routeros_scripts/get_dhcp_match";
 import {SshClient} from "@/lib/ssh-helper";
 import {get_bridge_host} from "@/lib/routeros_scripts/get_bridge_hosts_match";
+import {createParallelAction} from "next-server-actions-parallel";
 
 
 export interface DhcpLeaseInfo {
@@ -73,7 +74,7 @@ function parseRouterOsAsValue(output: string): Record<string, string>[] {
  * @param ospfResult The OSPF lookup result containing the router ID
  * @returns DHCP lease information if found
  */
-export async function lookupDhcpLease(
+export async function lookupDhcpLeaseInner(
   ipAddress: string,
   ospfResult: OspfLookupResult
 ): Promise<DhcpLeaseLookupResult> {
@@ -146,4 +147,4 @@ export async function lookupDhcpLease(
   }
 }
 
-// export const lookupDhcpLease = createParallelAction(lookupDhcpLeaseInner);
+export const lookupDhcpLease = createParallelAction(lookupDhcpLeaseInner);
