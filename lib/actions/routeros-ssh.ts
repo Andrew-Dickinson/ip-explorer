@@ -41,7 +41,7 @@ export interface HostInfo {
 }
 
 export interface DhcpLeaseLookupResult {
-  success: boolean
+  connectionSuccess: boolean
   leaseInfo?: DhcpLeaseInfo
   hostInfo?: HostInfo
   error?: string
@@ -88,15 +88,15 @@ export async function lookupDhcpLeaseInner(
   analyzeStatic(parsedAddress);
 
   // Check if we have a router ID from OSPF
-  if (!ospfResult.routerIds.length) {
+  if (ospfResult.routerIds.length === 0) {
     return {
-      success: false,
+      connectionSuccess: false,
       error: "No router ID available from OSPF lookup"
     }
   }
   if (ospfResult.routerIds.length > 1) {
     return {
-      success: false,
+      connectionSuccess: false,
       error: "RouterOS SSH not available for multicast addresses"
     }
   }
@@ -108,7 +108,7 @@ export async function lookupDhcpLeaseInner(
 
   if (!username || !password) {
     return {
-      success: false,
+      connectionSuccess: false,
       error: "SSH credentials not configured"
     }
   }
@@ -122,7 +122,7 @@ export async function lookupDhcpLeaseInner(
 
     if (leases.length === 0) {
       return {
-        success: false,
+        connectionSuccess: true,
         error: "No matching DHCP lease found"
       }
     }
@@ -133,14 +133,22 @@ export async function lookupDhcpLeaseInner(
     const hostInfo = hosts.length ? hosts[0] : undefined;
 
     return {
-      success: true,
+      connectionSuccess: true,
       leaseInfo: leases[0],
       hostInfo,
     }
   } catch (error) {
+    if (error instanceof Error && 'level' in error) {
+      return {
+        connectionSuccess: false,
+        error: `SSH error connecting to ${host}. Maybe this is not a RouterOS device, it has non-standard credentials, 
+        or is not set up to allow such connections?`,
+      }
+    }
+    console.error(error);
     return {
-      success: false,
-      error: `SSH error: ${error instanceof Error ? error.message : String(error)}`,
+      connectionSuccess: false,
+      error: `Unknown error, check logs for more info`,
     }
   } finally {
     sshClient.disconnect();

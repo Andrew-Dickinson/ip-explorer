@@ -28,8 +28,8 @@ export interface DhcpLeaseLookupCardProps extends React.ComponentProps<"div"> {
 export function DhcpLeaseLookup({
   ipAddress,
   ospfResult,
-  title = "MikroTik DHCP Lease Lookup",
-  description = "Retrieves DHCP lease information from MikroTik routers",
+  title = "RouterOS DHCP Lease Lookup",
+  description = "Retrieves DHCP lease information from RouterOS devices",
   className,
   ...props
 }: DhcpLeaseLookupCardProps) {
@@ -52,8 +52,8 @@ export function DhcpLeaseLookup({
         const result = await runParallelAction(lookupDhcpLease(ipAddress.toString(), ospfResult));
         setLookupResult(result)
 
-        if (!result.success) {
-          setError(result.error || "Failed to retrieve DHCP lease information")
+        if (!result.connectionSuccess) {
+          setError(result.error || "SSH Connection Failed")
         } else {
           setError(null)
         }
@@ -89,11 +89,11 @@ export function DhcpLeaseLookup({
               <AlertTriangle className="h-5 w-5 text-amber-600" />
             </div>
             <div className="space-y-1">
-              <p className="font-medium">Error Retrieving DHCP Lease</p>
+              <p className="font-medium">Error Retrieving Lease</p>
               <p className="text-sm text-muted-foreground">{error}</p>
             </div>
           </div>
-        ) : lookupResult && lookupResult.success && lookupResult.leaseInfo ? (
+        ) : lookupResult && lookupResult.connectionSuccess && lookupResult.leaseInfo ? (
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-green-100 flex flex-none items-center justify-center">
@@ -134,14 +134,16 @@ export function DhcpLeaseLookup({
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-red-100 flex flex-none items-center justify-center">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+            <div className="h-10 w-10 rounded-full bg-gray-100 flex flex-none items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-gray-600" />
             </div>
             <div className="space-y-1">
-              <p className="font-medium">No DHCP Lease Found</p>
+              <p className="font-medium">No Lease Found</p>
               <p className="text-xs text-muted-foreground">
-                No DHCP lease information was found for <span className="font-mono">{ipAddress.toString()}</span>. This
-                IP might be statically assigned or not currently active.
+                We succesfully connected to a RouterOS device at{" "}
+                <span className={"font-mono"}>{ospfResult.routerIds[0]}</span>, but no DHCP lease  was found for
+                <span className="font-mono">{ipAddress.toString()}</span>. This IP might be statically assigned
+                or not currently active.
               </p>
             </div>
           </div>

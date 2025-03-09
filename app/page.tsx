@@ -112,7 +112,7 @@ export default function Home() {
                   <UispLookup ipAddress={parsedAddress} />
                   <IpRangesIps ipAddress={parsedAddress}/>
                   <IpRangesHosts ipAddress={parsedAddress}/>
-                  { ospfLookupResult?.routerIds && [AddressType.STATIC_10_70, AddressType.DHCP].includes(staticResult.addressType) ?
+                  { ospfLookupResult?.routerIds.length === 1 && [AddressType.STATIC_10_70, AddressType.DHCP].includes(staticResult.addressType) ?
                     <DhcpLeaseLookup ipAddress={parsedAddress} ospfResult={ospfLookupResult}/> : null
                   }
                 </>
