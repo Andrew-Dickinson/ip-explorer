@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {MapPin, Server, User, FileText, Table2, Wrench} from "lucide-react"
 import { checkIpHost, type IpHostLookupResult } from "@/lib/actions/ip-ranges-hosts"
 import type { IPv4 } from "ipaddr.js"

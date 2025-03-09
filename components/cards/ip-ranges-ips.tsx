@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import {AlertTriangle, Info, Tag, User, Layers, FileText, Table2} from "lucide-react"
 import { checkIpRange, type IpRangeLookupResult } from "@/lib/actions/ip-ranges-ips"

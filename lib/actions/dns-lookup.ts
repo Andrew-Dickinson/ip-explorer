@@ -1,6 +1,5 @@
 "use server"
 
-import { promisify } from "util"
 import { IPv4 } from "ipaddr.js"
 import { analyzeStatic } from "@/lib/analyzers/static"
 import dns from "dns"
