@@ -32,7 +32,7 @@ const OIDS: Record<string, string> = {
   "1.3.6.1.2.1.1.2.0": "Manufacturer, Model, & Device Type",
   "1.3.6.1.2.1.1.5.0": "System Name",
   "1.3.6.1.2.1.1.1.0": "System Description",
-  "1.3.6.1.2.1.1.6.0": "System Location",
+  "1.3.6.1.2.1.1.6.0": "Location",
   "1.3.6.1.2.1.1.3.0": "Uptime",
 }
 
@@ -187,7 +187,7 @@ async function performSnmpQueryInner(
     return {results}
   } catch (error) {
     if (error instanceof Error && 'name' in error && error.name === "RequestTimedOutError") {
-      throw new Error("No response from device, request timed out");
+      return {results: []}
     } else {
       console.error("SNMP query error:", error);
       throw new Error("Unknown error while performing SNMP query, check logs")
