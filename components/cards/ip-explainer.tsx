@@ -23,6 +23,7 @@ export function IpExplainerCard({
     addressType, networkNumber, routerIndex, dhcpExplainerComponents, staticAddressCategory, ...props
 }: IpExplainerCardProps) {
   const [scale, setScale] = useState(1);
+  const cardRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
 
@@ -76,12 +77,17 @@ export function IpExplainerCard({
     }
 
     updateScale()
-    window.addEventListener("resize", updateScale)
-    return () => window.removeEventListener("resize", updateScale)
-  }, []);
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateScale()
+    });
+    if (cardRef.current) { resizeObserver.observe(cardRef.current) }
+    return () => resizeObserver.disconnect();
+  }, [cardRef]);
 
   return <Card
     className={className + " gap-3"}
+    ref={cardRef}
     {...props}>
     <CardHeader>
       <CardTitle>Address Breakdown</CardTitle>

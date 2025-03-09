@@ -93,7 +93,7 @@ export default function Home() {
       let columns = 1
       if (window.innerWidth >= 2200) columns = 4  // ~4xl
       else if (window.innerWidth >= 1636) columns = 3 // ~3xl
-      else if (window.innerWidth >= 1280) columns = 2  // ~xl
+      else if (window.innerWidth >= 1024) columns = 2  // ~lg
 
       let maxHeight = 0
       let currentCol = 0
@@ -138,11 +138,11 @@ export default function Home() {
   }, [parsedAddress, staticResult, ospfLookupResult])
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 px-0 md:px-20 xl:px-0 font-[family-name:var(--font-geist-sans)]">
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 px-0 md:px-20 lg:px-0 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 w-full items-center sm:items-start">
-        <div className="w-full mx-auto p-6 space-y-6 max-w-2xl xl:max-w-none">
+        <div className="w-full mx-auto p-6 space-y-6 max-w-2xl lg:max-w-none">
           <div className="space-y-4">
-            <div className={"mr-9"}>
+            <div className={"mr-9 mb-8"}>
               <div className="space-y-4 mx-auto max-w-[500px]">
                 <h2 className={"font-bold text-2xl"}>
                   <img src={"NYC_mesh_logo.svg"} className={"h-10 inline mr-1 -mt-1"}/> NYC Mesh{" "}
