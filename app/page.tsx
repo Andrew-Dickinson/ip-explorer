@@ -201,50 +201,9 @@ export default function Home() {
             </div>
             {parsedAddress && (
               <div className={styles.masonry} style={{height: "auto", maxHeight: "none"}} ref={masonryRef}>
-                {parsedAddress && staticResult?.addressProvenance !== undefined ? (
-                  <>
-                    <div className={styles.masonryItem}>
-                      <IcmpReachability ipAddress={parsedAddress}/>
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <TcpConnectivity ipAddress={parsedAddress} ports={TCP_PORTS_TO_SCAN}/>
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <DnsLookup ipAddress={parsedAddress}/>
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <SnmpInfo ipAddress={parsedAddress}/>
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <OspfLookup
-                        ipAddress={parsedAddress}
-                        isLoading={ospfQueryLoading}
-                        lookupResult={ospfLookupResult}
-                        error={ospfError}
-                      />
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <UispLookup ipAddress={parsedAddress}/>
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <IpRangesIps ipAddress={parsedAddress}/>
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <IpRangesHosts ipAddress={parsedAddress}/>
-                    </div>
-                    {ospfLookupResult?.routerIds.length === 1 &&
-                    [AddressType.STATIC_10_70, AddressType.DHCP].includes(staticResult.addressType) ? (
-                      <div className={styles.masonryItem}>
-                        <DhcpLeaseLookup ipAddress={parsedAddress} ospfResult={ospfLookupResult}/>
-                      </div>
-                    ) : null}
-                  </>
-                ) : (
-                  <></>
-                )}
                 {parsedAddress && staticResult ? (
                   <div className={styles.masonryItem}>
-                  <IpExplainerCard {...staticResult} />
+                    <IpExplainerCard {...staticResult} />
                   </div>
                 ) : (
                   parsedAddress && (
@@ -270,6 +229,47 @@ export default function Home() {
                     </div>
                   )
                 )}
+                {parsedAddress && staticResult?.addressProvenance !== undefined ? (
+                  <>
+                    <div className={styles.masonryItem}>
+                      <OspfLookup
+                        ipAddress={parsedAddress}
+                        isLoading={ospfQueryLoading}
+                        lookupResult={ospfLookupResult}
+                        error={ospfError}
+                      />
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <UispLookup ipAddress={parsedAddress}/>
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <IcmpReachability ipAddress={parsedAddress}/>
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <TcpConnectivity ipAddress={parsedAddress} ports={TCP_PORTS_TO_SCAN}/>
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <DnsLookup ipAddress={parsedAddress}/>
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <SnmpInfo ipAddress={parsedAddress}/>
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <IpRangesIps ipAddress={parsedAddress}/>
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <IpRangesHosts ipAddress={parsedAddress}/>
+                    </div>
+                    {ospfLookupResult?.routerIds.length === 1 &&
+                    [AddressType.STATIC_10_70, AddressType.DHCP].includes(staticResult.addressType) ? (
+                      <div className={styles.masonryItem}>
+                        <DhcpLeaseLookup ipAddress={parsedAddress} ospfResult={ospfLookupResult}/>
+                      </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <></>
+                )}
                 {parsedAddress && staticResult && staticResult.networkNumber && nnIPsResult ? (
                   <div className={styles.masonryItem}>
                     <IpsForNN
@@ -282,7 +282,7 @@ export default function Home() {
                   <></>
                 )}
               </div>
-              )
+            )
             }
           </div>
         </div>
