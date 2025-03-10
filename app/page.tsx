@@ -148,7 +148,7 @@ export default function Home() {
             <div className={"mr-9 mb-8"}>
               <div className="space-y-4 mx-auto max-w-[500px]">
                 <h2 className={"font-bold text-2xl"}>
-                  <img src={"NYC_Mesh_logo.svg"} className={"h-10 inline mr-1 -mt-1"}/> NYC Mesh{" "}
+                  <img src={"NYC_Mesh_logo.svg"} alt={"NYC Mesh Logo"} className="h-10 inline mr-1 -mt-1"/> NYC Mesh{" "}
                   <span className={"font-normal"}>|</span> <span className={"font-normal"}>IP Explorer</span>
                 </h2>
                 <div className="flex items-center gap-2">
