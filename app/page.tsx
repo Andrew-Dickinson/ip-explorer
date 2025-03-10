@@ -10,7 +10,8 @@ import { AddressType, type NNIPsResult, type StaticAnalysisResult } from "@/lib/
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ArrowRight, Ban, Lightbulb, RefreshCcw } from "lucide-react"
+import {ArrowRight, Ban, Lightbulb, RefreshCcw} from "lucide-react"
+import { SiGithub } from "@icons-pack/react-simple-icons"
 import { nnIps } from "@/lib/analyzers/nn-ips"
 import { IpsForNN } from "@/components/cards/ips-for-nn"
 import { IcmpReachability } from "@/components/cards/icmp-reachability"
@@ -138,7 +139,9 @@ export default function Home() {
   }, [parsedAddress, staticResult, ospfLookupResult])
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 px-0 md:px-20 lg:px-0 font-[family-name:var(--font-geist-sans)]">
+    <div className={"min-h-screen flex flex-col"}>
+    <div
+      className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center px-0 md:px-20 lg:px-0 font-[family-name:var(--font-geist-sans)] flex-1">
       <main className="flex flex-col gap-8 row-start-2 w-full items-center sm:items-start">
         <div className="w-full mx-auto p-6 space-y-6 max-w-2xl lg:max-w-none">
           <div className="space-y-4">
@@ -212,7 +215,8 @@ export default function Home() {
                         <CardContent>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-5">
-                              <div className="h-10 w-10 rounded-full bg-red-100 flex flex-none items-center justify-center">
+                              <div
+                                className="h-10 w-10 rounded-full bg-red-100 flex flex-none items-center justify-center">
                                 <Ban className="h-5 w-5 text-red-600"/>
                               </div>
                               <div className="space-y-1">
@@ -287,8 +291,58 @@ export default function Home() {
           </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center"></footer>
     </div>
-  )
+  <footer className="w-full py-6 border-t bg-gray-50 dark:bg-gray-900 flex-none">
+    <div className="container mx-auto px-4 max-w-[1000px]">
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+        <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+          <span>Other projects: </span>
+          <a
+            href="https://node-explorer.andrew.mesh.nycmesh.net/"
+            className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          >
+            Node Explorer
+          </a>
+          <a
+            href="https://node-explorer.andrew.mesh.nycmesh.net/outage-analyzer"
+            className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          >
+            Outage Simulator
+          </a>
+          <a
+            href="http://api.andrew.mesh/api/v1/mesh_ospf_data.json"
+            className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          >
+            OSPF API v1
+          </a>
+          <a
+            href="http://api.andrew.mesh/api/v2/mesh_ospf_data.json"
+            className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          >
+            OSPF API v2
+          </a>
+          <a
+            href="http://api.andrew.mesh/api/v2/ospf-event-stream/viewer.html"
+            className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          >
+            OSPF Event Feed
+          </a>
+        </div>
+        <div className="flex items-center gap-2">
+          <a
+            href="https://github.com/Andrew-Dickinson/ip-explorer"
+            className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <SiGithub size={16}/>
+            <span>Source Code</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  </div>
+)
 }
 
