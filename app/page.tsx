@@ -338,6 +338,17 @@ export default function Home() {
             <SiGithub size={16}/>
             <span>Source Code</span>
           </a>
+          {process.env.NEXT_PUBLIC_GIT_COMMIT_SHA && (
+            <span className={"mt-0.5 text-xs text-gray-500 dark:text-gray-500"}>
+              (<a
+                href={`https://github.com/Andrew-Dickinson/ip-explorer/commit/${process.env.NEXT_PUBLIC_GIT_COMMIT_SHA}`}
+                className="hover:text-gray-700 dark:hover:text-gray-300"
+                target="_blank"
+                rel="noopener noreferrer"
+                >{process.env.NEXT_PUBLIC_GIT_COMMIT_SHA.substring(0, 7)}</a>
+              )
+            </span>
+          )}
         </div>
       </div>
     </div>
