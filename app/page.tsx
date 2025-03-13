@@ -2,8 +2,7 @@
 import { IPExplainerExamples } from "@/components/examples"
 import { Input } from "@/components/ui/input"
 import { IpExplainerCard } from "@/components/cards/ip-explainer"
-import React, {useMemo} from "react"
-import { useEffect, useRef, useState } from "react"
+import React, {useEffect, useRef, useState, useMemo, useCallback} from "react"
 import { IPv4 } from "ipaddr.js"
 import { analyzeStatic } from "@/lib/analyzers/static"
 import { AddressType } from "@/lib/types"
@@ -26,6 +25,7 @@ import { checkOspfAdvertisement } from "@/lib/actions/ospf"
 import { DhcpLeaseLookup } from "@/components/cards/routeros-info"
 import styles from "../masonry.module.css"
 import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
+import {useUrlState} from "@/lib/hooks/use-url-state";
 
 const TCP_PORTS_TO_SCAN = [22, 80, 443]
 
@@ -34,7 +34,21 @@ export default function Home() {
   const inputAddressValid = IPv4.isValidFourPartDecimal(inputAddress)
 
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
-  const [parsedAddress, setParsedAddress] = useState<IPv4 | undefined>()
+
+  // undefined = default value inside useUrlState (we haven't checked the address bar yet)
+  // null = we checked the address bar and it was invalid or empty
+  const [parsedAddress, setParsedAddress] = useUrlState<IPv4 | null>({
+    paramName: "query",
+    serializer: useCallback((addr) => addr?.toString() ?? "", []),
+    deserializer: useCallback((str) => str ? (IPv4.isValidFourPartDecimal(str) ? IPv4.parse(str) : null) : null, [])
+  });
+
+  // Keep the text box in sync with the browser bar on page load
+  useEffect(() => {
+    if (parsedAddress) {
+      setInputAddress(parsedAddress.toString())
+    }
+  }, [parsedAddress]);
 
   const staticResult = useMemo(
     () => {
@@ -112,6 +126,10 @@ export default function Home() {
     }
   }, [parsedAddress, staticResult, ospfLookupResult])
 
+  // If we haven't yet parsed the query address from the browser bar,
+  // keep the page blank to avoid a flicker of the search bar in the center of the page
+  if (parsedAddress === undefined) return <></>
+
   return (
     <div className={"min-h-screen flex flex-col"}>
     <div
@@ -134,7 +152,7 @@ export default function Home() {
                     onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setInputAddress(e.target.value)
                       if (e.target.value === "") {
-                        setParsedAddress(undefined)
+                        setParsedAddress(null)
                       }
                     }}
                     onKeyDown={(e) => {
