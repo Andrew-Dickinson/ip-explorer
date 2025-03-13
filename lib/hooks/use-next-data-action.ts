@@ -31,6 +31,7 @@ export function useNextParallelDataAction<T, U extends JSONSerializable<never>[]
         setResult(result)
         console.log(action.name);
       } catch (err) {
+        if (isCancelled) return;
         setError({message: err instanceof Error ? err.message : "Unknown error"})
         setResult(undefined)
       } finally {
