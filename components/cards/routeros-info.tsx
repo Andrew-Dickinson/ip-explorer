@@ -24,6 +24,7 @@ export interface DhcpLeaseLookupCardProps extends React.ComponentProps<"div"> {
   ospfResult: OspfLookupResult
   title?: string
   description?: string
+  lastRefresh: Date
 }
 
 export function DhcpLeaseLookup({
@@ -32,6 +33,7 @@ export function DhcpLeaseLookup({
   title = "RouterOS DHCP Lease Lookup",
   description = "Retrieves DHCP lease information from RouterOS devices",
   className,
+  lastRefresh,
   ...props
 }: DhcpLeaseLookupCardProps) {
   const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
@@ -45,7 +47,8 @@ export function DhcpLeaseLookup({
 
   const [lookupResult, isLoading, error] = useNextParallelDataAction(
     lookupDhcpLease,
-    [ipAddress.toString(), ospfResult, secureContentPSK ?? ""]
+    [ipAddress.toString(), ospfResult, secureContentPSK ?? ""],
+    lastRefresh,
   );
 
   // if (!result.connectionSuccess) {

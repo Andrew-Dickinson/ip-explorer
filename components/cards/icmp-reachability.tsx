@@ -12,6 +12,7 @@ export interface IcmpReachabilityCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
   title?: string
   description?: string
+  lastRefresh: Date
 }
 
 export function IcmpReachability({
@@ -19,11 +20,13 @@ export function IcmpReachability({
   title = "ICMP Reachability",
   description = "Shows ping results and latency for this IP address (from Supernode 3 & 10)",
   className,
+  lastRefresh,
   ...props
 }: IcmpReachabilityCardProps) {
   const [pingResult, isLoading, error] = useNextParallelDataAction(
     checkIcmpReachability,
-    [ipAddress.toString()]
+    [ipAddress.toString()],
+    lastRefresh,
   );
 
   return (

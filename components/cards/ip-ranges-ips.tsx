@@ -14,6 +14,7 @@ export interface IpRangeLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
   title?: string
   description?: string
+  lastRefresh: Date
 }
 
 export function IpRangesIps({
@@ -21,13 +22,15 @@ export function IpRangesIps({
   title = "IPRanges Google Sheet Lookup - IPs",
   description = "Searches the IPRanges spreadsheet to see if this address falls into any of the static ranges defined there",
   className,
+  lastRefresh,
   ...props
 }: IpRangeLookupCardProps) {
   const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
 
   const [lookupResult, isLoading, error] = useNextParallelDataAction(
     checkIpRange,
-    [ipAddress.toString(), secureContentPSK ?? ""]
+    [ipAddress.toString(), secureContentPSK ?? ""],
+    lastRefresh,
   );
 
   return (

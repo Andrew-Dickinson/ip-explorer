@@ -6,14 +6,15 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Network, Router, AlertTriangle } from "lucide-react"
 import { type OspfLookupResult } from "@/lib/actions/ospf"
 import type { IPv4 } from "ipaddr.js"
+import {DataActionError} from "@/lib/hooks/use-next-data-action";
 
 export interface OspfLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
   title?: string
   description?: string
   isLoading: boolean
-  lookupResult: OspfLookupResult | null,
-  error: string | null
+  lookupResult: OspfLookupResult | undefined,
+  error: DataActionError | undefined
 }
 
 const NODE_EXPLORER_PREFIX = "https://node-explorer.andrew.mesh.nycmesh.net/explorer?router=";
@@ -52,7 +53,7 @@ export function OspfLookup({
                 </div>
                 <div className="space-y-1">
                   <p className="font-medium">Error Checking OSPF Table</p>
-                  <p className="text-sm text-muted-foreground">{error}</p>
+                  <p className="text-sm text-muted-foreground">{error.message}</p>
                 </div>
               </>
             ) : lookupResult && lookupResult.routerIds.length ? (

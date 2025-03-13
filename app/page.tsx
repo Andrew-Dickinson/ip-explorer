@@ -2,11 +2,11 @@
 import { IPExplainerExamples } from "@/components/examples"
 import { Input } from "@/components/ui/input"
 import { IpExplainerCard } from "@/components/cards/ip-explainer"
-import type React from "react"
+import React, {useMemo} from "react"
 import { useEffect, useRef, useState } from "react"
 import { IPv4 } from "ipaddr.js"
 import { analyzeStatic } from "@/lib/analyzers/static"
-import { AddressType, type StaticAnalysisResult } from "@/lib/types"
+import { AddressType } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -22,10 +22,10 @@ import { UispLookup } from "@/components/cards/uisp-lookup"
 import { IpRangesIps } from "@/components/cards/ip-ranges-ips"
 import { IpRangesHosts } from "@/components/cards/ip-ranges-hosts"
 import { DnsLookup } from "@/components/cards/dns-lookup"
-import { checkOspfAdvertisement, type OspfLookupResult } from "@/lib/actions/ospf"
-import { runParallelAction } from "next-server-actions-parallel"
+import { checkOspfAdvertisement } from "@/lib/actions/ospf"
 import { DhcpLeaseLookup } from "@/components/cards/routeros-info"
 import styles from "../masonry.module.css"
+import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
 
 const TCP_PORTS_TO_SCAN = [22, 80, 443]
 
@@ -33,45 +33,25 @@ export default function Home() {
   const [inputAddress, setInputAddress] = useState<string>("")
   const inputAddressValid = IPv4.isValidFourPartDecimal(inputAddress)
 
-  const [parsedAddress, setParsedAddress] = useState<IPv4 | null>()
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [parsedAddress, setParsedAddress] = useState<IPv4 | undefined>()
 
-  const [staticResult, setStaticResult] = useState<StaticAnalysisResult | null>()
-
-  const [ospfQueryLoading, setIsLoading] = useState(true)
-  const [ospfLookupResult, setLookupResult] = useState<OspfLookupResult | null>(null)
-  const [ospfError, setError] = useState<string | null>(null)
-
-  const resetState = () => {
-    setStaticResult(null)
-    setIsLoading(false)
-    setError(null)
-    setLookupResult(null)
-  }
-
-  useEffect(() => {
-    if (parsedAddress) {
+  const staticResult = useMemo(
+    () => {
       try {
-        const res = analyzeStatic(parsedAddress)
-        setStaticResult(res)
-      } catch {}
-
-      const checkAdvertisement = async () => {
-        try {
-          setIsLoading(true)
-          const result = await runParallelAction(checkOspfAdvertisement(parsedAddress.toString()))
-          setLookupResult(result)
-          setError(null)
-        } catch (err) {
-          setError(err instanceof Error ? err.message : "Unknown error")
-          setLookupResult(null)
-        } finally {
-          setIsLoading(false)
-        }
+        return parsedAddress ? analyzeStatic(parsedAddress) : undefined
+      } catch {
+        return undefined
       }
+    },
+    [parsedAddress]
+  );
 
-      checkAdvertisement()
-    }
-  }, [parsedAddress])
+  const [ospfLookupResult, ospfQueryLoading, ospfError] = useNextParallelDataAction(
+    checkOspfAdvertisement,
+    [parsedAddress?.toString() ?? ""],
+    lastRefresh
+  );
 
   const masonryRef = useRef<HTMLDivElement>(null);
 
@@ -154,13 +134,12 @@ export default function Home() {
                     onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setInputAddress(e.target.value)
                       if (e.target.value === "") {
-                        setParsedAddress(null)
-                        resetState()
+                        setParsedAddress(undefined)
                       }
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && inputAddressValid) {
-                        resetState()
+                        setLastRefresh(new Date());
                         setParsedAddress(IPv4.parse(inputAddress))
                       }
                     }}
@@ -170,7 +149,7 @@ export default function Home() {
                     icon={!inputAddressValid || inputAddress !== parsedAddress?.toString() ? ArrowRight : RefreshCcw}
                     disabled={!inputAddressValid}
                     onClick={() => {
-                      resetState()
+                      setLastRefresh(new Date())
                       setParsedAddress(IPv4.parse(inputAddress))
                     }}
                   />
@@ -238,30 +217,30 @@ export default function Home() {
                       />
                     </div>
                     <div className={styles.masonryItem}>
-                      <UispLookup ipAddress={parsedAddress}/>
+                      <UispLookup ipAddress={parsedAddress} lastRefresh={lastRefresh} />
                     </div>
                     <div className={styles.masonryItem}>
-                      <IcmpReachability ipAddress={parsedAddress}/>
+                      <IcmpReachability ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
                     </div>
                     <div className={styles.masonryItem}>
-                      <TcpConnectivity ipAddress={parsedAddress} ports={TCP_PORTS_TO_SCAN}/>
+                      <TcpConnectivity ipAddress={parsedAddress} ports={TCP_PORTS_TO_SCAN} lastRefresh={lastRefresh}/>
                     </div>
                     <div className={styles.masonryItem}>
-                      <DnsLookup ipAddress={parsedAddress}/>
+                      <DnsLookup ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
                     </div>
                     <div className={styles.masonryItem}>
-                      <SnmpInfo ipAddress={parsedAddress}/>
+                      <SnmpInfo ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
                     </div>
                     <div className={styles.masonryItem}>
-                      <IpRangesIps ipAddress={parsedAddress}/>
+                      <IpRangesIps ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
                     </div>
                     <div className={styles.masonryItem}>
-                      <IpRangesHosts ipAddress={parsedAddress}/>
+                      <IpRangesHosts ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
                     </div>
                     {ospfLookupResult?.routerIds.length === 1 &&
                     [AddressType.STATIC_10_70, AddressType.DHCP].includes(staticResult.addressType) ? (
                       <div className={styles.masonryItem}>
-                        <DhcpLeaseLookup ipAddress={parsedAddress} ospfResult={ospfLookupResult}/>
+                        <DhcpLeaseLookup ipAddress={parsedAddress} ospfResult={ospfLookupResult} lastRefresh={lastRefresh}/>
                       </div>
                     ) : null}
                   </>

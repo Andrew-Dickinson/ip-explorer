@@ -12,6 +12,7 @@ export interface DnsLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
   title?: string
   description?: string
+  lastRefresh: Date
 }
 
 export function DnsLookup({
@@ -19,11 +20,13 @@ export function DnsLookup({
   title = "DNS Lookup",
   description = "Shows reverse DNS lookup results for this IP address",
   className,
+  lastRefresh,
   ...props
 }: DnsLookupCardProps) {
   const [dnsResult, isLoading, error] = useNextParallelDataAction(
     performReverseDnsLookup,
-    [ipAddress.toString()]
+    [ipAddress.toString()],
+    lastRefresh,
   );
 
   return (

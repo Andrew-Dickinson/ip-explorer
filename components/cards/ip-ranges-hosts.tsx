@@ -13,6 +13,7 @@ export interface IpHostsLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
   title?: string
   description?: string
+  lastRefresh: Date
 }
 
 export function IpRangesHosts({
@@ -20,13 +21,15 @@ export function IpRangesHosts({
   title = "IPRanges Google Sheet Lookup - Hosts",
   description = "Searches the IPRanges spreadsheet to see if this address matches any of the hosts defined there",
   className,
+  lastRefresh,
   ...props
 }: IpHostsLookupCardProps) {
   const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
 
   const [lookupResult, isLoading, error] = useNextParallelDataAction(
     checkIpHost,
-    [ipAddress.toString(), secureContentPSK ?? ""]
+    [ipAddress.toString(), secureContentPSK ?? ""],
+    lastRefresh,
   );
 
   if (secureContentPSK && (isLoading || error || !lookupResult?.hostData)) {

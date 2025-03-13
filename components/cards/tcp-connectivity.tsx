@@ -15,6 +15,7 @@ export interface TcpConnectivityCardProps extends React.ComponentProps<"div"> {
   ports: number[]
   title?: string
   description?: string
+  lastRefresh: Date
 }
 
 export function TcpConnectivity({
@@ -23,11 +24,13 @@ export function TcpConnectivity({
   title = "TCP Connectivity",
   description = "Shows TCP port status for common services",
   className,
+  lastRefresh,
   ...props
 }: TcpConnectivityCardProps) {
   const [tcpResults, isLoading, error] = useNextParallelDataAction(
     checkTcpConnectivity,
-    [ipAddress.toString(), ports]
+    [ipAddress.toString(), ports],
+    lastRefresh,
   );
 
   return (

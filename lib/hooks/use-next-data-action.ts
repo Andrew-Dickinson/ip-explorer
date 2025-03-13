@@ -4,11 +4,11 @@ import {useJSONMemo} from "@/lib/hooks/use-json-memo";
 import {JSONSerializable} from "@/lib/types";
 
 
-interface DataActionError {
+export interface DataActionError {
   message: string;
 }
 // <T, U extends unknown[]>(action: (...args: U) => Promise<T>)
-export function useNextParallelDataAction<T, U extends JSONSerializable<never>[]>(action: (...args: U) => Promise<readonly [Promise<T>]>, args: U): [T | undefined, boolean, DataActionError | undefined] {
+export function useNextParallelDataAction<T, U extends JSONSerializable<never>[]>(action: (...args: U) => Promise<readonly [Promise<T>]>, args: U, refreshTime?: Date): [T | undefined, boolean, DataActionError | undefined] {
   const [result, setResult] = useState<T | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<DataActionError | undefined>();
@@ -40,7 +40,7 @@ export function useNextParallelDataAction<T, U extends JSONSerializable<never>[]
 
     callAction()
     return () => { isCancelled = true;}
-  }, [action, argsMemo])
+  }, [action, argsMemo, refreshTime])
 
   return [result, isLoading, error];
 }

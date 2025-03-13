@@ -20,6 +20,7 @@ export interface SnmpInfoCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
   title?: string
   description?: string
+  lastRefresh: Date
 }
 
 function isError(res: SnmpResult | SnmpError): res is SnmpError {
@@ -41,11 +42,13 @@ export function SnmpInfo({
   title = "SNMP Device Information",
   description = "Shows basic device information retrieved from the device via the SNMP protocol",
   className,
+  lastRefresh,
   ...props
 }: SnmpInfoCardProps) {
   const [snmpResult, isLoading, error] = useNextParallelDataAction(
     performSnmpQuery,
-    [ipAddress.toString()]
+    [ipAddress.toString()],
+    lastRefresh,
   );
 
   return (

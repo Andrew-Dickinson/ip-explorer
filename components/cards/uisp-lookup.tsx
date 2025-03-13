@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useMemo} from "react"
+import React from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AlertTriangle, Wifi, Server } from "lucide-react"
 import { lookupUispDeviceByIp } from "@/lib/actions/uisp"
@@ -14,6 +14,7 @@ export interface UispLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
   title?: string
   description?: string
+  lastRefresh: Date
 }
 
 export function UispLookup({
@@ -21,6 +22,7 @@ export function UispLookup({
   title = "UISP Device Lookup",
   description = "Searches UISP to find devices with the specified IP address",
   className,
+  lastRefresh,
   ...props
 }: UispLookupCardProps) {
   const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
@@ -28,7 +30,8 @@ export function UispLookup({
   const ipAddrString = ipAddress.toString();
   const [devices, isLoading, error] = useNextParallelDataAction(
     lookupUispDeviceByIp,
-    [ipAddrString, secureContentPSK ?? ""]
+    [ipAddrString, secureContentPSK ?? ""],
+    lastRefresh,
   );
 
   return (
