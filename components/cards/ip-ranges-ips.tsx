@@ -1,15 +1,14 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import {AlertTriangle, Info, Tag, User, Layers, FileText, Table2} from "lucide-react"
-import { checkIpRange, type IpRangeLookupResult } from "@/lib/actions/ip-ranges-ips"
+import { checkIpRange } from "@/lib/actions/ip-ranges-ips"
 import type { IPv4 } from "ipaddr.js"
-import {runParallelAction} from "next-server-actions-parallel";
 import {PSK_STORAGE_KEY} from "@/lib/constants";
 import {useLocalStorage} from "@/lib/hooks/use-local-storage";
 import {SecureCard} from "@/components/cards/secure-card";
+import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
 
 export interface IpRangeLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -26,31 +25,10 @@ export function IpRangesIps({
 }: IpRangeLookupCardProps) {
   const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
 
-  const [isLoading, setIsLoading] = useState(true)
-  const [lookupResult, setLookupResult] = useState<IpRangeLookupResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (secureContentPSK) {
-      const checkRange = async () => {
-        try {
-          setIsLoading(true)
-          const result = await runParallelAction(
-            checkIpRange(ipAddress.toString(), secureContentPSK)
-          )
-          setLookupResult(result)
-          setError(null)
-        } catch (err) {
-          setError(err instanceof Error ? err.message : "Unknown error")
-          setLookupResult(null)
-        } finally {
-          setIsLoading(false)
-        }
-      }
-
-      checkRange()
-    }
-  }, [ipAddress, secureContentPSK])
+  const [lookupResult, isLoading, error] = useNextParallelDataAction(
+    checkIpRange,
+    [ipAddress.toString(), secureContentPSK ?? ""]
+  );
 
   return (
     <SecureCard title={title} description={description} className={className} {...props}>
@@ -69,7 +47,7 @@ export function IpRangesIps({
             </div>
             <div className="space-y-1">
               <p className="font-medium">Error Checking IPRanges Sheet</p>
-              <p className="text-sm text-muted-foreground">{error}</p>
+              <p className="text-sm text-muted-foreground">{error.message}</p>
             </div>
           </div>
         ) : lookupResult && lookupResult.found && lookupResult.rangeData ? (

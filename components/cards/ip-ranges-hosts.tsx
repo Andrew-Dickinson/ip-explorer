@@ -1,14 +1,13 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
 import {MapPin, Server, User, FileText, Table2, Wrench} from "lucide-react"
-import { checkIpHost, type IpHostLookupResult } from "@/lib/actions/ip-ranges-hosts"
+import { checkIpHost } from "@/lib/actions/ip-ranges-hosts"
 import type { IPv4 } from "ipaddr.js"
-import {runParallelAction} from "next-server-actions-parallel";
 import {PSK_STORAGE_KEY} from "@/lib/constants";
 import {useLocalStorage} from "@/lib/hooks/use-local-storage";
 import {SecureCard} from "@/components/cards/secure-card";
+import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
 
 export interface IpHostsLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -25,26 +24,12 @@ export function IpRangesHosts({
 }: IpHostsLookupCardProps) {
   const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
 
-  const [lookupResult, setLookupResult] = useState<IpHostLookupResult | null>(null)
+  const [lookupResult, isLoading, error] = useNextParallelDataAction(
+    checkIpHost,
+    [ipAddress.toString(), secureContentPSK ?? ""]
+  );
 
-  useEffect(() => {
-    if (secureContentPSK) {
-      const checkHost = async () => {
-        try {
-          const result = await runParallelAction(
-            checkIpHost(ipAddress.toString(), secureContentPSK)
-          );
-          setLookupResult(result)
-        } catch {
-          setLookupResult(null)
-        }
-      }
-
-      checkHost()
-    }
-  }, [ipAddress, secureContentPSK])
-
-  if (!lookupResult?.hostData && secureContentPSK) {
+  if (secureContentPSK && (isLoading || error || !lookupResult?.hostData)) {
     return <></>
   }
 

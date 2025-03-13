@@ -6,13 +6,12 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { IPv4 } from "ipaddr.js"
 import { analyzeStatic } from "@/lib/analyzers/static"
-import { AddressType, type NNIPsResult, type StaticAnalysisResult } from "@/lib/types"
+import { AddressType, type StaticAnalysisResult } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {ArrowRight, Ban, Lightbulb, RefreshCcw} from "lucide-react"
 import { SiGithub } from "@icons-pack/react-simple-icons"
-import { nnIps } from "@/lib/analyzers/nn-ips"
 import { IpsForNN } from "@/components/cards/ips-for-nn"
 import { IcmpReachability } from "@/components/cards/icmp-reachability"
 import { Card, CardContent } from "@/components/ui/card"
@@ -37,7 +36,6 @@ export default function Home() {
   const [parsedAddress, setParsedAddress] = useState<IPv4 | null>()
 
   const [staticResult, setStaticResult] = useState<StaticAnalysisResult | null>()
-  const [nnIPsResult, setNnnIPsResult] = useState<NNIPsResult | null>()
 
   const [ospfQueryLoading, setIsLoading] = useState(true)
   const [ospfLookupResult, setLookupResult] = useState<OspfLookupResult | null>(null)
@@ -45,7 +43,6 @@ export default function Home() {
 
   const resetState = () => {
     setStaticResult(null)
-    setNnnIPsResult(null)
     setIsLoading(false)
     setError(null)
     setLookupResult(null)
@@ -55,9 +52,6 @@ export default function Home() {
     if (parsedAddress) {
       try {
         const res = analyzeStatic(parsedAddress)
-        if (res.networkNumber) {
-          setNnnIPsResult(nnIps(res.networkNumber))
-        }
         setStaticResult(res)
       } catch {}
 
@@ -274,12 +268,10 @@ export default function Home() {
                 ) : (
                   <></>
                 )}
-                {parsedAddress && staticResult && staticResult.networkNumber && nnIPsResult ? (
+                {parsedAddress && staticResult && staticResult.networkNumber ? (
                   <div className={styles.masonryItem}>
                     <IpsForNN
                       networkNumber={staticResult.networkNumber}
-                      addresses={nnIPsResult.addresses}
-                      CIDRs={nnIPsResult.CIDRs}
                     />
                   </div>
                 ) : (

@@ -1,14 +1,12 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
+import React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import {Clock, ArrowUpDown, Activity, AlertTriangle} from "lucide-react"
-import {checkIcmpReachability, PingResult} from "@/lib/actions/ping"
+import {checkIcmpReachability} from "@/lib/actions/ping"
 import {IPv4} from "ipaddr.js";
-import {runParallelAction} from "next-server-actions-parallel";
+import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
 
 export interface IcmpReachabilityCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -23,27 +21,10 @@ export function IcmpReachability({
   className,
   ...props
 }: IcmpReachabilityCardProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [pingResult, setPingResult] = useState<PingResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const checkReachability = async () => {
-      try {
-        setIsLoading(true)
-        const result = await runParallelAction(checkIcmpReachability(ipAddress.toString()));
-        setPingResult(result);
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error")
-        setPingResult({reachable: false, averageLatency: null, packetLoss: 1, sent: 0, received: 0});
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    checkReachability()
-  }, [ipAddress])
+  const [pingResult, isLoading, error] = useNextParallelDataAction(
+    checkIcmpReachability,
+    [ipAddress.toString()]
+  );
 
   return (
     <Card className={className} {...props}>
@@ -69,7 +50,7 @@ export function IcmpReachability({
                 </div>
                 <div className="space-y-1">
                   <p className="font-medium">Error Determining Reachability</p>
-                  <p className="text-sm text-muted-foreground">{error}</p>
+                  <p className="text-sm text-muted-foreground">{error.message}</p>
                 </div>
               </>
             ) : pingResult && pingResult.reachable ? (

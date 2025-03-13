@@ -7,6 +7,7 @@ import {get_dhcp_match} from "@/lib/routeros_scripts/get_dhcp_match";
 import {SshClient} from "@/lib/ssh-helper";
 import {get_bridge_host} from "@/lib/routeros_scripts/get_bridge_hosts_match";
 import {createParallelAction} from "next-server-actions-parallel";
+import {JSONCompatible} from "@/lib/types";
 
 
 export interface DhcpLeaseInfo {
@@ -77,7 +78,7 @@ function parseRouterOsAsValue(output: string): Record<string, string>[] {
  */
 export async function lookupDhcpLeaseInner(
   ipAddress: string,
-  ospfResult: OspfLookupResult,
+  ospfResult: JSONCompatible<OspfLookupResult>,
   psk: string,
 ): Promise<DhcpLeaseLookupResult> {
   // Validate PSK

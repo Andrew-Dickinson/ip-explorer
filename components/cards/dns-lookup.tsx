@@ -1,13 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import {AlertTriangle, Globe} from "lucide-react"
-import { performReverseDnsLookup, type DnsLookupResult } from "@/lib/actions/dns-lookup"
+import { performReverseDnsLookup } from "@/lib/actions/dns-lookup"
 import type { IPv4 } from "ipaddr.js"
-import {runParallelAction} from "next-server-actions-parallel";
+import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
 
 export interface DnsLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -22,27 +21,10 @@ export function DnsLookup({
   className,
   ...props
 }: DnsLookupCardProps) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [dnsResult, setDnsResult] = useState<DnsLookupResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const lookupHostname = async () => {
-      try {
-        setIsLoading(true)
-        const result = await runParallelAction(performReverseDnsLookup(ipAddress.toString()));
-        setDnsResult(result)
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error")
-        setDnsResult(null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    lookupHostname()
-  }, [ipAddress])
+  const [dnsResult, isLoading, error] = useNextParallelDataAction(
+    performReverseDnsLookup,
+    [ipAddress.toString()]
+  );
 
   return (
     <Card className={className} {...props}>
@@ -68,7 +50,7 @@ export function DnsLookup({
                 </div>
                 <div className="space-y-1">
                   <p className="font-medium">Error Performing DNS Lookup</p>
-                  <p className="text-sm text-muted-foreground">{error}</p>
+                  <p className="text-sm text-muted-foreground">{error.message}</p>
                 </div>
               </>
             ) : dnsResult && dnsResult.hostnames.length > 0 ? (

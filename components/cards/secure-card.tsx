@@ -1,6 +1,6 @@
 "use client"
 
-import {useEffect, useState} from "react"
+import {useState} from "react"
 import type React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -47,18 +47,6 @@ export function SecureCard({
 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [inputPassword, setInputPassword] = useState("")
-
-  useEffect(() => {
-    setInputPassword("");
-    setPendingAuthResponse(false);
-    setInvalidPassword(false);
-    setAuthError(false);
-  }, [isDialogOpen])
-
-  useEffect(() => {
-    setAuthError(false);
-    setInvalidPassword(false);
-  }, [inputPassword]);
 
   const handleUnlockAttempt = async () => {
     if (pendingAuthResponse) { return; }
@@ -117,7 +105,13 @@ export function SecureCard({
         ) : children}
       </CardContent>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(isOpen) => {
+        setIsDialogOpen(isOpen)
+        setInputPassword("");
+        setPendingAuthResponse(false);
+        setInvalidPassword(false);
+        setAuthError(false);
+      }}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Enter Password</DialogTitle>
@@ -132,7 +126,12 @@ export function SecureCard({
                 id="password"
                 type="password"
                 value={inputPassword}
-                onChange={(e) => setInputPassword(e.target.value)}
+                onChange={(e) => {
+                  setInputPassword(e.target.value);
+                  setAuthError(false);
+                  setInvalidPassword(false);
+                }
+              }
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     handleUnlockAttempt()

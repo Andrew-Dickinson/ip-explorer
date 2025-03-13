@@ -1,15 +1,14 @@
 "use client"
 
 import type React from "react"
-import {useEffect, useState} from "react"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
 import {Skeleton} from "@/components/ui/skeleton"
 import {AlertTriangle, BrickWall, Cable, ClockAlert} from "lucide-react"
-import {checkTcpConnectivity, type TcpConnectivityResult} from "@/lib/actions/tcp-check"
+import {checkTcpConnectivity} from "@/lib/actions/tcp-check"
 import type {IPv4} from "ipaddr.js"
 import {Badge} from "@/components/ui/badge"
 import {PortStatus} from "@/lib/types";
-import {runParallelAction} from "next-server-actions-parallel";
+import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
 
 export interface TcpConnectivityCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -26,27 +25,10 @@ export function TcpConnectivity({
   className,
   ...props
 }: TcpConnectivityCardProps) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [tcpResults, setTcpResults] = useState<TcpConnectivityResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const checkConnectivity = async () => {
-      try {
-        setIsLoading(true)
-        const result = await runParallelAction(checkTcpConnectivity(ipAddress.toString(), ports));
-        setTcpResults(result)
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error")
-        setTcpResults(null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    checkConnectivity()
-  }, [ipAddress, ports])
+  const [tcpResults, isLoading, error] = useNextParallelDataAction(
+    checkTcpConnectivity,
+    [ipAddress.toString(), ports]
+  );
 
   return (
     <Card className={className} {...props}>
@@ -72,7 +54,7 @@ export function TcpConnectivity({
               </div>
               <div className="space-y-1">
                 <p className="font-medium">Error Checking TCP Connectivity</p>
-                <p className="text-sm text-muted-foreground">{error}</p>
+                <p className="text-sm text-muted-foreground">{error.message}</p>
               </div>
             </div>
           ) : tcpResults ? (

@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -13,9 +12,9 @@ import {
   MapPinned,
   Server, SquarePen
 } from "lucide-react"
-import {performSnmpQuery, SnmpError, type SnmpQueryResult, SnmpResult} from "@/lib/actions/snmp-query"
+import {performSnmpQuery, SnmpError, SnmpResult} from "@/lib/actions/snmp-query"
 import type { IPv4 } from "ipaddr.js"
-import {runParallelAction} from "next-server-actions-parallel";
+import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
 
 export interface SnmpInfoCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -44,27 +43,10 @@ export function SnmpInfo({
   className,
   ...props
 }: SnmpInfoCardProps) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [snmpResult, setSnmpResult] = useState<SnmpQueryResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const fetchSnmpInfo = async () => {
-      try {
-        setIsLoading(true)
-        const result = await runParallelAction(performSnmpQuery(ipAddress.toString()));
-        setSnmpResult(result)
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error")
-        setSnmpResult(null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchSnmpInfo()
-  }, [ipAddress])
+  const [snmpResult, isLoading, error] = useNextParallelDataAction(
+    performSnmpQuery,
+    [ipAddress.toString()]
+  );
 
   return (
     <Card className={className} {...props}>
@@ -86,7 +68,7 @@ export function SnmpInfo({
             </div>
             <div className="space-y-1">
               <p className="font-medium">Error Fetching SNMP Information</p>
-              <p className="text-sm text-muted-foreground">{error}</p>
+              <p className="text-sm text-muted-foreground">{error.message}</p>
             </div>
           </div>
         ) : snmpResult?.results.length ? (

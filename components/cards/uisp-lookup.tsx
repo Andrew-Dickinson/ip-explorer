@@ -1,15 +1,14 @@
 "use client"
 
-import type React from "react"
-import { useState, useEffect } from "react"
+import React, {useMemo} from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AlertTriangle, Wifi, Server } from "lucide-react"
-import { lookupUispDeviceByIp, type UispDeviceResult } from "@/lib/actions/uisp"
+import { lookupUispDeviceByIp } from "@/lib/actions/uisp"
 import {IPv4} from "ipaddr.js";
 import {PSK_STORAGE_KEY, UISP_URL} from "@/lib/constants";
-import {runParallelAction} from "next-server-actions-parallel";
 import {SecureCard} from "@/components/cards/secure-card";
 import {useLocalStorage} from "@/lib/hooks/use-local-storage";
+import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
 
 export interface UispLookupCardProps extends React.ComponentProps<"div"> {
   ipAddress: IPv4
@@ -26,33 +25,11 @@ export function UispLookup({
 }: UispLookupCardProps) {
   const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
 
-  const [isLoading, setIsLoading] = useState(true)
-  const [devices, setDevices] = useState<UispDeviceResult[]>([])
-  const [error, setError] = useState<string | null>(null)
-
-  console.log(secureContentPSK);
-
-  useEffect(() => {
-    if (secureContentPSK) {
-      const lookupDevice = async () => {
-        try {
-          setIsLoading(true)
-          const result = await runParallelAction(
-            lookupUispDeviceByIp(ipAddress.toString(), secureContentPSK)
-          );
-          setDevices(result)
-          setError(null)
-        } catch (err) {
-          setError(err instanceof Error ? err.message : "Unknown error")
-          setDevices([])
-        } finally {
-          setIsLoading(false)
-        }
-      }
-
-      lookupDevice()
-    }
-  }, [ipAddress, secureContentPSK])
+  const ipAddrString = ipAddress.toString();
+  const [devices, isLoading, error] = useNextParallelDataAction(
+    lookupUispDeviceByIp,
+    [ipAddrString, secureContentPSK ?? ""]
+  );
 
   return (
     <SecureCard
@@ -77,14 +54,14 @@ export function UispLookup({
               </div>
             </div>
           </div>
-        ) : error ? (
+        ) : !devices ? (
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-amber-100 flex flex-none items-center justify-center">
               <AlertTriangle className="h-5 w-5 text-amber-600" />
             </div>
             <div className="space-y-1">
               <p className="font-medium">Error Looking Up Device in UISP</p>
-              <p className="text-sm text-muted-foreground">{error}</p>
+              <p className="text-sm text-muted-foreground">{error?.message}</p>
             </div>
           </div>
         ) : devices.length === 0 ? (

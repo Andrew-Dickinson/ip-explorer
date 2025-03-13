@@ -1,28 +1,28 @@
 import {IPv4} from "ipaddr.js";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import React from "react";
-import {ExplainedAddress, ExplainedCIDR} from "@/lib/types";
 import {intToIp} from "@/lib/utils";
+import {nnIps} from "@/lib/analyzers/nn-ips";
 
 export interface IpsForNNProps extends React.ComponentProps<"div"> {
-  networkNumber: number;
-  addresses: ExplainedAddress[];
-  CIDRs?: ExplainedCIDR[];
+  networkNumber?: number;
 }
 
-export function IpsForNN({
-  networkNumber,
-  addresses,
-  CIDRs,
-className,
-...props}: IpsForNNProps) {
+export function IpsForNN({networkNumber, className, ...props}: IpsForNNProps) {
+  if (!networkNumber) {
+    // Hide this card if there is no trivial
+    // network number association for the entered address
+    return <></>
+  }
+
+  const {addresses, CIDRs} = nnIps(networkNumber);
   return <Card
         className={className + " gap-3"}
       {...props}>
       <CardHeader>
         <CardTitle>Expected Addresses for NN{networkNumber}</CardTitle>
       <CardDescription className={"text-xs"}>
-        Shows all the IP addresses that we&#39;d expect to find at this network number
+        Shows all the IP addresses that we&#39;d expect to be able to find at this network number
         (based on mesh convention, these may not actually be in use)
       </CardDescription>
       </CardHeader>
