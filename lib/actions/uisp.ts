@@ -1,7 +1,7 @@
 "use server"
 
 import { IPv4 } from "ipaddr.js"
-import { fetch, Agent } from "undici"
+import { Agent } from "undici"
 import UISP_CERT from "@/lib/certificates/uisp.mesh.nycmesh.net.pem"
 import { UISP_API_URL } from "@/lib/constants"
 import { isUispDeviceArray, type UispDevice } from "@/types/uisp"
@@ -41,6 +41,7 @@ async function loginToUISP(
       username,
       password
     }),
+    // @ts-expect-error - dispatcher is not in the standard RequestInit type
     dispatcher: new Agent({
       connect: {
         ca: UISP_CERT,
@@ -98,6 +99,7 @@ async function fetchUispDevices(): Promise<UispDevice[]> {
       Accept: "application/json",
       "x-auth-token": await loginToUISP(process.env.UISP_USER, process.env.UISP_PASSWORD),
     },
+    // @ts-expect-error - dispatcher is not in the standard RequestInit type
     dispatcher: new Agent({
       connect: {
         ca: UISP_CERT,
