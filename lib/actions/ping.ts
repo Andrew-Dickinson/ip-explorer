@@ -53,6 +53,9 @@ async function checkIcmpReachabilityInner(ipAddress: string): Promise<PingResult
       if (isExecError(error)) {stdout = error.stdout;} else throw error;
     }
 
+    console.log("PING OUTPUT DEBUG");
+    console.log(stdout);
+
     // Parse the ping results
     const packetLossMatch = stdout.match(/([\d.]+)% packet loss/)
     const packetLoss = packetLossMatch ? Number.parseFloat(packetLossMatch[1]) / 100 : 1;
