@@ -16,7 +16,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ARG GIT_COMMIT_HASH
-ENV NEXT_PUBLIC_GIT_COMMIT_HASH=$GIT_COMMIT_HASH
+ENV NEXT_PUBLIC_GIT_COMMIT_SHA=$GIT_COMMIT_HASH
 
 # Build the Next.js application
 RUN npm run build
