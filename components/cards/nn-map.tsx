@@ -6,12 +6,13 @@ import {Loader2} from "lucide-react";
 
 export interface NnMapProps extends React.ComponentProps<"div"> {
   networkNumber?: number;
+  lastRefresh: Date;
   updateParsedAddress: (addr: IPv4) => void;
 }
 
-export function NnMap({networkNumber, updateParsedAddress, className, ...props}: NnMapProps) {
+export function NnMap({networkNumber, lastRefresh, updateParsedAddress, className, ...props}: NnMapProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const [mapLoaded , setMapLoaded] = useState<boolean>(false);
+  const [mapLoaded, setMapLoaded] = useState<boolean>(false);
 
   const syncMap = useCallback((networkNumber: number | undefined) => {
     if (iframeRef.current) {
@@ -42,7 +43,7 @@ export function NnMap({networkNumber, updateParsedAddress, className, ...props}:
 
     window.addEventListener("message", listener);
     return () => {window.removeEventListener("message", listener);}
-  }, [updateParsedAddress, networkNumber, syncMap]);
+  }, [updateParsedAddress, networkNumber, lastRefresh, syncMap]);
 
   return <Card
     className={className + " gap-3 " + (!networkNumber ? "hidden" : "")}

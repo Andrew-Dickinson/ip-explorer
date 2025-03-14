@@ -228,7 +228,8 @@ export default function Explorer() {
                   {parsedAddress && staticResult?.addressProvenance !== undefined ? (
                     <>
                       <div className={styles.masonryItem}>
-                        <NnMap networkNumber={staticResult.networkNumber} updateParsedAddress={setParsedAddress}/>
+                        <NnMap networkNumber={staticResult.networkNumber} lastRefresh={lastRefresh}
+                               updateParsedAddress={setParsedAddress}/>
                       </div>
                       <div className={styles.masonryItem}>
                         <OspfLookup
