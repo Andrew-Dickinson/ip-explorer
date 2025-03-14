@@ -5,15 +5,20 @@ import {promisify} from "util"
 import {IPv4} from "ipaddr.js";
 import {analyzeStatic} from "@/lib/analyzers/static";
 import {createParallelAction} from "next-server-actions-parallel";
+import {ActionResult} from "@/lib/types";
 
 const execAsync = promisify(exec)
 
-export interface PingResult {
+export interface PingData {
   reachable: boolean
   averageLatency: number | null
   packetLoss: number
   sent: number
   received: number
+}
+
+export interface PingResult extends ActionResult {
+  pingData?: PingData
 }
 
 const isExecError = (err: unknown): err is Error & { stdout: string } => {
@@ -64,15 +69,17 @@ async function checkIcmpReachabilityInner(ipAddress: string): Promise<PingResult
     const received = receivedMatch ? Number.parseInt(receivedMatch[1], 10) : 0
 
     return {
-      reachable: packetLoss < 1,
-      averageLatency,
-      packetLoss,
-      sent,
-      received,
+      pingData: {
+        reachable: packetLoss < 1,
+        averageLatency,
+        packetLoss,
+        sent,
+        received,
+      }
     }
   } catch (error) {
     console.error(error);
-    throw new Error("Unexpected error parsing ping output");
+    return { error: "Unexpected error parsing ping results, check logs for more info" }
   }
 }
 

@@ -56,7 +56,7 @@ export function IcmpReachability({
                   <p className="text-sm text-muted-foreground">{error.message}</p>
                 </div>
               </>
-            ) : pingResult && pingResult.reachable ? (
+            ) : pingResult?.pingData?.reachable ? (
               <>
                 <div className="h-10 w-10 rounded-full bg-green-100 flex flex-none items-center justify-center">
                   <ArrowUpDown className="h-5 w-5 text-green-600" />
@@ -66,11 +66,11 @@ export function IcmpReachability({
                   <div className="flex items-center gap-5 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Clock className="h-3.5 w-3.5"/>
-                      <span className="font-mono">{pingResult.averageLatency?.toFixed(2)} ms</span>
+                      <span className="font-mono">{pingResult.pingData.averageLatency?.toFixed(2)} ms</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Activity className="h-3.5 w-3.5"/>
-                      <span className="font-mono">{(pingResult.packetLoss * 100).toFixed(0)}% loss</span>
+                      <span className="font-mono">{(pingResult.pingData.packetLoss * 100).toFixed(0)}% loss</span>
                     </div>
                   </div>
                 </div>

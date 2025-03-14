@@ -3,6 +3,7 @@
 import { IPv4 } from "ipaddr.js"
 import { google } from "googleapis"
 import {createParallelAction} from "next-server-actions-parallel";
+import {ActionResult} from "@/lib/types";
 
 export interface IpHostData {
   rowNum: number
@@ -14,7 +15,7 @@ export interface IpHostData {
   notes: string
 }
 
-export interface IpHostLookupResult {
+export interface IpHostLookupResult extends ActionResult {
   found: boolean
   hostData?: IpHostData
 }
@@ -150,7 +151,7 @@ export async function checkIpHostInner(ipAddress: string, psk: string): Promise<
     return { found: false }
   } catch (error) {
     console.error("Error checking IP host:", error)
-    throw error
+    return { found: false, error: "Error checking IP host, check logs for more info" }
   }
 }
 

@@ -7,7 +7,7 @@ import {get_dhcp_match} from "@/lib/routeros_scripts/get_dhcp_match";
 import {SshClient} from "@/lib/ssh-helper";
 import {get_bridge_host} from "@/lib/routeros_scripts/get_bridge_hosts_match";
 import {createParallelAction} from "next-server-actions-parallel";
-import {JSONCompatible} from "@/lib/types";
+import {ActionResult, JSONCompatible} from "@/lib/types";
 
 
 export interface DhcpLeaseInfo {
@@ -41,11 +41,10 @@ export interface HostInfo {
   [key: string]: string | undefined
 }
 
-export interface DhcpLeaseLookupResult {
+export interface DhcpLeaseLookupResult extends ActionResult {
   connectionSuccess: boolean
   leaseInfo?: DhcpLeaseInfo
   hostInfo?: HostInfo
-  error?: string
 }
 
 /**

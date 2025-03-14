@@ -4,6 +4,7 @@ import { IPv4 } from "ipaddr.js"
 import { analyzeStatic } from "@/lib/analyzers/static"
 import dns from "dns"
 import {createParallelAction} from "next-server-actions-parallel";
+import {ActionResult} from "@/lib/types";
 
 
 const MESH_AUTHORITATIVE_DNS_SERVER_ADDRESS = "23.158.16.23";
@@ -15,7 +16,7 @@ resolver.setServers([MESH_AUTHORITATIVE_DNS_SERVER_ADDRESS]);
 // const reverse = promisify(resolver.reverse);
 
 
-export interface DnsLookupResult {
+export interface DnsLookupResult extends ActionResult {
   hostnames: string[]
   success: boolean
 }
@@ -56,7 +57,7 @@ export async function performReverseDnsLookupInner(ipAddress: string): Promise<D
     }
 
     console.error("DNS lookup error:", error)
-    throw new Error("DNS lookup error");
+    return { success: false, hostnames: [], error: "DNS lookup error, check logs for more info" };
   }
 }
 

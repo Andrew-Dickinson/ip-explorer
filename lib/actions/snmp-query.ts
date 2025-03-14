@@ -7,6 +7,7 @@ import snmp from "net-snmp"
 import { getDeviceInfo } from "snmp-sysobjectid"
 import moment from "moment";
 import {createParallelAction} from "next-server-actions-parallel";
+import {ActionResult} from "@/lib/types";
 
 const SNMP_COMMUNITY = "public";
 
@@ -23,7 +24,7 @@ export interface SnmpResult {
   value: string | number | boolean;
   type: string;
 }
-export interface SnmpQueryResult {
+export interface SnmpQueryResult extends ActionResult {
   results: (SnmpResult | SnmpError)[]
 }
 
@@ -190,7 +191,7 @@ async function performSnmpQueryInner(
       return {results: []}
     } else {
       console.error("SNMP query error:", error);
-      throw new Error("Unknown error while performing SNMP query, check logs")
+      return { results: [], error: "Unexpected error while performing SNMP query, check logs for more info" }
     }
   } finally {
     if (session) {

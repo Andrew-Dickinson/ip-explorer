@@ -2,10 +2,11 @@
 
 import { IPv4, parseCIDR } from "ipaddr.js"
 import {createParallelAction} from "next-server-actions-parallel";
+import {ActionResult} from "@/lib/types";
 
 const OSPF_ENDPOINT= "https://api.andrew.mesh.nycmesh.net/api/v1/mesh_ospf_data.json";
 
-export interface OspfLookupResult {
+export interface OspfLookupResult extends ActionResult {
   routerIds: string[]
 }
 
@@ -109,7 +110,7 @@ async function checkOspfAdvertisementInner(ipAddress: string): Promise<OspfLooku
     }
   } catch (error) {
     console.error("Error checking OSPF advertisement:", error)
-    throw error
+    return { routerIds: [], error: "Error checking OSPF advertisement, check logs for more info" }
   }
 }
 

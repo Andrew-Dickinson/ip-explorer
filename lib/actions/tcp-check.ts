@@ -2,7 +2,7 @@
 import { Socket } from "net"
 import { IPv4 } from "ipaddr.js"
 import { analyzeStatic } from "@/lib/analyzers/static"
-import { PortStatus } from "../types"
+import {ActionResult, PortStatus} from "../types"
 import {createParallelAction} from "next-server-actions-parallel";
 
 export interface TcpCheckResult {
@@ -10,7 +10,7 @@ export interface TcpCheckResult {
   status: PortStatus
 }
 
-export interface TcpConnectivityResult {
+export interface TcpConnectivityResult extends ActionResult {
   results: TcpCheckResult[]
 }
 

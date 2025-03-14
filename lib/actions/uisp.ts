@@ -6,6 +6,7 @@ import UISP_CERT from "@/lib/certificates/uisp.mesh.nycmesh.net.pem"
 import { UISP_API_URL } from "@/lib/constants"
 import { isUispDeviceArray, type UispDevice } from "@/types/uisp"
 import { createParallelAction } from "next-server-actions-parallel"
+import {ActionResult} from "@/lib/types";
 
 // Cache structure for device data
 interface DeviceCache {
@@ -64,13 +65,17 @@ async function loginToUISP(
   return token;
 }
 
-export interface UispDeviceResult {
+export interface UispDeviceData {
   id: string
   name: string
   model: string
   type: string
   siteName: string
   isOnline: boolean
+}
+
+export interface UispDeviceResult extends ActionResult {
+  devices: UispDeviceData[]
 }
 
 /**
@@ -124,7 +129,7 @@ async function fetchUispDevices(): Promise<UispDevice[]> {
  * @param psk The pre-shared key to access this endpoint
  * @returns Array of devices matching the IP address
  */
-async function lookupUispDeviceByIpInner(ipAddress: string, psk: string): Promise<UispDeviceResult[]> {
+async function lookupUispDeviceByIpInner(ipAddress: string, psk: string): Promise<UispDeviceResult> {
   // Validate PSK
   if (psk !== process.env.SECURE_CONTENT_PSK) {
     throw new Error("Invalid psk");
@@ -173,17 +178,17 @@ async function lookupUispDeviceByIpInner(ipAddress: string, psk: string): Promis
     })
 
     // Map to simplified result objects
-    return matchingDevices.map((device: UispDevice) => ({
+    return {devices: matchingDevices.map((device: UispDevice) => ({
       id: device.identification?.id || "unknown",
       name: device.identification?.name || device.identification?.hostname || "Unnamed Device",
       model: device.identification?.model || "Unknown",
       type: device.identification?.role || "Unknown",
       siteName: device.identification?.site?.name || "Unknown",
       isOnline: device.overview?.status === "active" || false,
-    }))
+    }))}
   } catch (error) {
     console.error("Error looking up UISP device:", error)
-    throw new Error("Error looking up UISP device, check logs");
+    return { devices: [], error: "Error looking up UISP device, check logs for more info"}
   }
 }
 

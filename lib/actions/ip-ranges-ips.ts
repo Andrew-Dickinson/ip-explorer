@@ -3,6 +3,7 @@
 import { IPv4, parseCIDR } from "ipaddr.js"
 import { google } from "googleapis"
 import {createParallelAction} from "next-server-actions-parallel";
+import {ActionResult} from "@/lib/types";
 
 
 export interface IpRangeData {
@@ -18,7 +19,7 @@ export interface IpRangeData {
   comment: string
 }
 
-export interface IpRangeLookupResult {
+export interface IpRangeLookupResult extends ActionResult {
   found: boolean
   rangeData?: IpRangeData
 }
@@ -163,7 +164,7 @@ async function checkIpRangeInner(ipAddress: string, psk: string): Promise<IpRang
 
   } catch (error) {
     console.error("Error checking IP range:", error)
-    throw error
+    return { found: false, error: "Error checking IP range, check logs for more info" }
   }
 }
 

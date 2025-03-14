@@ -65,6 +65,10 @@ export interface NNIPsResult {
   CIDRs: ExplainedCIDR[];
 }
 
+export interface ActionResult {
+  error?: string;
+}
+
 
 type JSONPrimitive = string | number | boolean | null | undefined;
 

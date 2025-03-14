@@ -28,8 +28,12 @@ export function useNextParallelDataAction<T, U extends JSONSerializable<never>[]
         setIsLoading(true)
         const result = await runParallelAction(action(...argsMemo));
         if (isCancelled) return;
-        setResult(result)
-        console.log(action.name);
+        if (result instanceof Object && 'error' in result && typeof result.error === "string") {
+          setError({message: result.error})
+          setResult(undefined)
+        } else {
+          setResult(result)
+        }
       } catch (err) {
         if (isCancelled) return;
         setError({message: err instanceof Error ? err.message : "Unknown error"})
