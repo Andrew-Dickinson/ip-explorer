@@ -53,18 +53,26 @@ async function checkIcmpReachabilityInner(ipAddress: string): Promise<PingResult
       if (isExecError(error)) {stdout = error.stdout;} else throw error;
     }
 
-    console.log("PING OUTPUT DEBUG");
-    console.log(stdout);
-
     // Parse the ping results
     const packetLossMatch = stdout.match(/([\d.]+)% packet loss/)
     const packetLoss = packetLossMatch ? Number.parseFloat(packetLossMatch[1]) / 100 : 1;
 
-    // Different patterns for different OS outputs
-    const latencyMatch = stdout.match(/round-trip min\/avg\/max\/stddev = [\d.]+\/([\d.]+)\/[\d.]+\/[\d.]+/);
-    const averageLatency = latencyMatch ? Number.parseFloat(latencyMatch[1]) : null
+    // Parse average latency - handle both output formats
+    let averageLatency: number | null = null
 
-    // Count sent and received packets
+    // macOS/BSD format: "round-trip min/avg/max/stddev = 8.279/23.655/49.702/15.653 ms"
+    const macLatencyMatch = stdout.match(/round-trip min\/avg\/max\/stddev = [\d.]+\/([\d.]+)\/[\d.]+\/[\d.]+/)
+
+    // Linux format: "round-trip min/avg/max = 23.347/59.592/107.671 ms"
+    const linuxLatencyMatch = stdout.match(/round-trip min\/avg\/max = [\d.]+\/([\d.]+)\/[\d.]+/)
+
+    if (macLatencyMatch) {
+      averageLatency = Number.parseFloat(macLatencyMatch[1])
+    } else if (linuxLatencyMatch) {
+      averageLatency = Number.parseFloat(linuxLatencyMatch[1])
+    }
+
+    // Count sent and received packets - works on both platforms
     const sentMatch = stdout.match(/(\d+) packets transmitted/)
     const receivedMatch = stdout.match(/(\d+) (?:packets )?received/)
 
