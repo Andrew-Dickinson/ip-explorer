@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {ArrowRight, Ban, Lightbulb, RefreshCcw} from "lucide-react"
-import { SiGithub } from "@icons-pack/react-simple-icons"
 import { IpsForNN } from "@/components/cards/ips-for-nn"
 import { IcmpReachability } from "@/components/cards/icmp-reachability"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,6 +26,7 @@ import styles from "../masonry.module.css"
 import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
 import {useUrlState} from "@/lib/hooks/use-url-state";
 import {NnMap} from "@/components/cards/nn-map";
+import GitHubIcon from "@/components/ui/github";
 
 const TCP_PORTS_TO_SCAN = [22, 80, 443]
 
@@ -329,7 +329,7 @@ export default function Explorer() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <SiGithub size={16}/>
+                <GitHubIcon/>
                 <span>Source Code</span>
               </a>
               {process.env.NEXT_PUBLIC_GIT_COMMIT_SHA && (
