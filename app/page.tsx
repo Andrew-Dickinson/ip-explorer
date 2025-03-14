@@ -2,7 +2,7 @@
 import { IPExplainerExamples } from "@/components/examples"
 import { Input } from "@/components/ui/input"
 import { IpExplainerCard } from "@/components/cards/ip-explainer"
-import React, {useEffect, useRef, useState, useMemo, useCallback} from "react"
+import React, {useEffect, useRef, useState, useMemo, useCallback, Suspense} from "react"
 import { IPv4 } from "ipaddr.js"
 import { analyzeStatic } from "@/lib/analyzers/static"
 import { AddressType } from "@/lib/types"
@@ -132,221 +132,223 @@ export default function Home() {
   if (parsedAddress === undefined) return <></>
 
   return (
-    <div className={"min-h-screen flex flex-col"}>
-    <div
-      className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center px-0 md:px-20 lg:px-0 font-[family-name:var(--font-geist-sans)] flex-1">
-      <main className="flex flex-col gap-8 row-start-2 w-full items-center sm:items-start">
-        <div className="w-full mx-auto p-6 space-y-6 max-w-2xl lg:max-w-none">
-          <div className="space-y-4">
-            <div className={"mr-9 mb-8"}>
-              <div className="space-y-4 mx-auto max-w-[500px]">
-                <h2 className={"font-bold text-2xl"}>
-                  <img src={"NYC_Mesh_logo.svg"} alt={"NYC Mesh Logo"} className="h-10 inline mr-1 -mt-1"/> NYC Mesh{" "}
-                  <span className={"font-normal"}>|</span> <span className={"font-normal"}>IP Explorer</span>
-                </h2>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="text"
-                    placeholder="Enter IP address..."
-                    className="text-lg max-w-md"
-                    value={inputAddress}
-                    onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setInputAddress(e.target.value)
-                      if (e.target.value === "") {
-                        setParsedAddress(null)
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && inputAddressValid) {
-                        setLastRefresh(new Date());
+    <Suspense>
+      <div className={"min-h-screen flex flex-col"}>
+      <div
+        className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center px-0 md:px-20 lg:px-0 font-[family-name:var(--font-geist-sans)] flex-1">
+        <main className="flex flex-col gap-8 row-start-2 w-full items-center sm:items-start">
+          <div className="w-full mx-auto p-6 space-y-6 max-w-2xl lg:max-w-none">
+            <div className="space-y-4">
+              <div className={"mr-9 mb-8"}>
+                <div className="space-y-4 mx-auto max-w-[500px]">
+                  <h2 className={"font-bold text-2xl"}>
+                    <img src={"NYC_Mesh_logo.svg"} alt={"NYC Mesh Logo"} className="h-10 inline mr-1 -mt-1"/> NYC Mesh{" "}
+                    <span className={"font-normal"}>|</span> <span className={"font-normal"}>IP Explorer</span>
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      placeholder="Enter IP address..."
+                      className="text-lg max-w-md"
+                      value={inputAddress}
+                      onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setInputAddress(e.target.value)
+                        if (e.target.value === "") {
+                          setParsedAddress(null)
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && inputAddressValid) {
+                          setLastRefresh(new Date());
+                          setParsedAddress(IPv4.parse(inputAddress))
+                        }
+                      }}
+                    />
+                    <Button
+                      variant={"default"}
+                      icon={!inputAddressValid || inputAddress !== parsedAddress?.toString() ? ArrowRight : RefreshCcw}
+                      disabled={!inputAddressValid}
+                      onClick={() => {
+                        setLastRefresh(new Date())
                         setParsedAddress(IPv4.parse(inputAddress))
-                      }
-                    }}
-                  />
-                  <Button
-                    variant={"default"}
-                    icon={!inputAddressValid || inputAddress !== parsedAddress?.toString() ? ArrowRight : RefreshCcw}
-                    disabled={!inputAddressValid}
-                    onClick={() => {
-                      setLastRefresh(new Date())
-                      setParsedAddress(IPv4.parse(inputAddress))
-                    }}
-                  />
-                </div>
-                {!parsedAddress && (
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant={"secondary"} icon={Lightbulb}>
-                        Examples
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent className="w-[100vw] sm:max-w-2xl">
-                      <SheetHeader>
-                        <SheetTitle>Address Breakdown Examples</SheetTitle>
-                      </SheetHeader>
-                      <ScrollArea className="h-full">
-                        <div className="max-w-[590px] mx-auto">
-                          <IPExplainerExamples/>
-                        </div>
-                      </ScrollArea>
-                    </SheetContent>
-                  </Sheet>
-                )}
-              </div>
-            </div>
-            {parsedAddress && (
-              <div className={styles.masonry} style={{height: "auto", maxHeight: "none"}} ref={masonryRef}>
-                {parsedAddress && staticResult ? (
-                  <div className={styles.masonryItem}>
-                    <IpExplainerCard {...staticResult} />
-                  </div>
-                ) : (
-                  parsedAddress && (
-                    <div className={styles.masonryItem}>
-                      <Card className={"max-w-lg"}>
-                        <CardContent>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-5">
-                              <div
-                                className="h-10 w-10 rounded-full bg-red-100 flex flex-none items-center justify-center">
-                                <Ban className="h-5 w-5 text-red-600"/>
-                              </div>
-                              <div className="space-y-1">
-                                <p className="font-medium">Invalid Address</p>
-                                <p className="text-xs text-muted-foreground">
-                                  This doesn&#39;t look like a valid NYC Mesh IP address. Please check that the entered
-                                  address is correct and try again
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  )
-                )}
-                {parsedAddress && staticResult?.addressProvenance !== undefined ? (
-                  <>
-                    <div className={styles.masonryItem}>
-                      <NnMap networkNumber={staticResult.networkNumber} updateParsedAddress={setParsedAddress}/>
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <OspfLookup
-                        ipAddress={parsedAddress}
-                        isLoading={ospfQueryLoading}
-                        lookupResult={ospfLookupResult}
-                        error={ospfError}
-                      />
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <UispLookup ipAddress={parsedAddress} lastRefresh={lastRefresh} />
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <IcmpReachability ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <TcpConnectivity ipAddress={parsedAddress} ports={TCP_PORTS_TO_SCAN} lastRefresh={lastRefresh}/>
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <DnsLookup ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <SnmpInfo ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <IpRangesIps ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
-                    </div>
-                    <div className={styles.masonryItem}>
-                      <IpRangesHosts ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
-                    </div>
-                    {ospfLookupResult?.routerIds.length === 1 &&
-                    [AddressType.STATIC_10_70, AddressType.DHCP].includes(staticResult.addressType) ? (
-                      <div className={styles.masonryItem}>
-                        <DhcpLeaseLookup ipAddress={parsedAddress} ospfResult={ospfLookupResult} lastRefresh={lastRefresh}/>
-                      </div>
-                    ) : null}
-                  </>
-                ) : (
-                  <></>
-                )}
-                {parsedAddress && staticResult && staticResult.networkNumber ? (
-                  <div className={styles.masonryItem}>
-                    <IpsForNN
-                      networkNumber={staticResult.networkNumber}
+                      }}
                     />
                   </div>
-                ) : (
-                  <></>
-                )}
+                  {!parsedAddress && (
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button variant={"secondary"} icon={Lightbulb}>
+                          Examples
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent className="w-[100vw] sm:max-w-2xl">
+                        <SheetHeader>
+                          <SheetTitle>Address Breakdown Examples</SheetTitle>
+                        </SheetHeader>
+                        <ScrollArea className="h-full">
+                          <div className="max-w-[590px] mx-auto">
+                            <IPExplainerExamples/>
+                          </div>
+                        </ScrollArea>
+                      </SheetContent>
+                    </Sheet>
+                  )}
+                </div>
               </div>
-            )
-            }
+              {parsedAddress && (
+                <div className={styles.masonry} style={{height: "auto", maxHeight: "none"}} ref={masonryRef}>
+                  {parsedAddress && staticResult ? (
+                    <div className={styles.masonryItem}>
+                      <IpExplainerCard {...staticResult} />
+                    </div>
+                  ) : (
+                    parsedAddress && (
+                      <div className={styles.masonryItem}>
+                        <Card className={"max-w-lg"}>
+                          <CardContent>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-5">
+                                <div
+                                  className="h-10 w-10 rounded-full bg-red-100 flex flex-none items-center justify-center">
+                                  <Ban className="h-5 w-5 text-red-600"/>
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="font-medium">Invalid Address</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    This doesn&#39;t look like a valid NYC Mesh IP address. Please check that the entered
+                                    address is correct and try again
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )
+                  )}
+                  {parsedAddress && staticResult?.addressProvenance !== undefined ? (
+                    <>
+                      <div className={styles.masonryItem}>
+                        <NnMap networkNumber={staticResult.networkNumber} updateParsedAddress={setParsedAddress}/>
+                      </div>
+                      <div className={styles.masonryItem}>
+                        <OspfLookup
+                          ipAddress={parsedAddress}
+                          isLoading={ospfQueryLoading}
+                          lookupResult={ospfLookupResult}
+                          error={ospfError}
+                        />
+                      </div>
+                      <div className={styles.masonryItem}>
+                        <UispLookup ipAddress={parsedAddress} lastRefresh={lastRefresh} />
+                      </div>
+                      <div className={styles.masonryItem}>
+                        <IcmpReachability ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
+                      </div>
+                      <div className={styles.masonryItem}>
+                        <TcpConnectivity ipAddress={parsedAddress} ports={TCP_PORTS_TO_SCAN} lastRefresh={lastRefresh}/>
+                      </div>
+                      <div className={styles.masonryItem}>
+                        <DnsLookup ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
+                      </div>
+                      <div className={styles.masonryItem}>
+                        <SnmpInfo ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
+                      </div>
+                      <div className={styles.masonryItem}>
+                        <IpRangesIps ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
+                      </div>
+                      <div className={styles.masonryItem}>
+                        <IpRangesHosts ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
+                      </div>
+                      {ospfLookupResult?.routerIds.length === 1 &&
+                      [AddressType.STATIC_10_70, AddressType.DHCP].includes(staticResult.addressType) ? (
+                        <div className={styles.masonryItem}>
+                          <DhcpLeaseLookup ipAddress={parsedAddress} ospfResult={ospfLookupResult} lastRefresh={lastRefresh}/>
+                        </div>
+                      ) : null}
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  {parsedAddress && staticResult && staticResult.networkNumber ? (
+                    <div className={styles.masonryItem}>
+                      <IpsForNN
+                        networkNumber={staticResult.networkNumber}
+                      />
+                    </div>
+                  ) : (
+                    <></>
+                  )}
+                </div>
+              )
+              }
+            </div>
+          </div>
+        </main>
+      </div>
+    <footer className="w-full py-6 border-t bg-gray-50 dark:bg-gray-900 flex-none">
+      <div className="container mx-auto px-4 max-w-[1000px]">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+          <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+            <span>Other projects: </span>
+            <a
+              href="https://node-explorer.andrew.mesh.nycmesh.net/"
+              className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            >
+              Node Explorer
+            </a>
+            <a
+              href="https://node-explorer.andrew.mesh.nycmesh.net/outage-analyzer"
+              className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            >
+              Outage Simulator
+            </a>
+            <a
+              href="http://api.andrew.mesh/api/v1/mesh_ospf_data.json"
+              className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            >
+              OSPF API v1
+            </a>
+            <a
+              href="http://api.andrew.mesh/api/v2/mesh_ospf_data.json"
+              className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            >
+              OSPF API v2
+            </a>
+            <a
+              href="http://api.andrew.mesh/api/v2/ospf-event-stream/viewer.html"
+              className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            >
+              OSPF Event Feed
+            </a>
+          </div>
+          <div className="flex items-center gap-2">
+            <a
+              href="https://github.com/Andrew-Dickinson/ip-explorer"
+              className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <SiGithub size={16}/>
+              <span>Source Code</span>
+            </a>
+            {process.env.NEXT_PUBLIC_GIT_COMMIT_SHA && (
+              <span className={"mt-0.5 text-xs text-gray-500 dark:text-gray-500"}>
+                (<a
+                  href={`https://github.com/Andrew-Dickinson/ip-explorer/commit/${process.env.NEXT_PUBLIC_GIT_COMMIT_SHA}`}
+                  className="hover:text-gray-700 dark:hover:text-gray-300"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >{process.env.NEXT_PUBLIC_GIT_COMMIT_SHA.substring(0, 7)}</a>
+                )
+              </span>
+            )}
           </div>
         </div>
-      </main>
-    </div>
-  <footer className="w-full py-6 border-t bg-gray-50 dark:bg-gray-900 flex-none">
-    <div className="container mx-auto px-4 max-w-[1000px]">
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
-        <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-          <span>Other projects: </span>
-          <a
-            href="https://node-explorer.andrew.mesh.nycmesh.net/"
-            className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-          >
-            Node Explorer
-          </a>
-          <a
-            href="https://node-explorer.andrew.mesh.nycmesh.net/outage-analyzer"
-            className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-          >
-            Outage Simulator
-          </a>
-          <a
-            href="http://api.andrew.mesh/api/v1/mesh_ospf_data.json"
-            className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-          >
-            OSPF API v1
-          </a>
-          <a
-            href="http://api.andrew.mesh/api/v2/mesh_ospf_data.json"
-            className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-          >
-            OSPF API v2
-          </a>
-          <a
-            href="http://api.andrew.mesh/api/v2/ospf-event-stream/viewer.html"
-            className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-          >
-            OSPF Event Feed
-          </a>
-        </div>
-        <div className="flex items-center gap-2">
-          <a
-            href="https://github.com/Andrew-Dickinson/ip-explorer"
-            className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <SiGithub size={16}/>
-            <span>Source Code</span>
-          </a>
-          {process.env.NEXT_PUBLIC_GIT_COMMIT_SHA && (
-            <span className={"mt-0.5 text-xs text-gray-500 dark:text-gray-500"}>
-              (<a
-                href={`https://github.com/Andrew-Dickinson/ip-explorer/commit/${process.env.NEXT_PUBLIC_GIT_COMMIT_SHA}`}
-                className="hover:text-gray-700 dark:hover:text-gray-300"
-                target="_blank"
-                rel="noopener noreferrer"
-                >{process.env.NEXT_PUBLIC_GIT_COMMIT_SHA.substring(0, 7)}</a>
-              )
-            </span>
-          )}
-        </div>
       </div>
+    </footer>
     </div>
-  </footer>
-  </div>
+  </Suspense>
 )
 }
 
