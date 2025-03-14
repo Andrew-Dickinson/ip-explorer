@@ -26,6 +26,7 @@ import { DhcpLeaseLookup } from "@/components/cards/routeros-info"
 import styles from "../masonry.module.css"
 import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
 import {useUrlState} from "@/lib/hooks/use-url-state";
+import {NnMap} from "@/components/cards/nn-map";
 
 const TCP_PORTS_TO_SCAN = [22, 80, 443]
 
@@ -226,6 +227,9 @@ export default function Home() {
                 )}
                 {parsedAddress && staticResult?.addressProvenance !== undefined ? (
                   <>
+                    <div className={styles.masonryItem}>
+                      <NnMap networkNumber={staticResult.networkNumber} updateParsedAddress={setParsedAddress}/>
+                    </div>
                     <div className={styles.masonryItem}>
                       <OspfLookup
                         ipAddress={parsedAddress}
