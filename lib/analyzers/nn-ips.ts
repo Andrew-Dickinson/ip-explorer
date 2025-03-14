@@ -6,6 +6,15 @@ const POOL_START_REL = 6;
 const POOL_END_REL = 57;
 export const THRID_IP_CUTOFF = 55;
 
+export function ospfIP(networkNumber: number, index: number, wds?: boolean) {
+  const nnFirstPart = Math.floor(networkNumber / 100);
+  const nnSecondPart = networkNumber % 100;
+
+  const lastOctet = index > 0 ? nnSecondPart.toString().padStart(2, '0') : nnSecondPart.toString();
+
+  return IPv4.parse(`10.${wds ? "68" : "69"}.${nnFirstPart}.${index > 0 ? index : ""}${lastOctet}`)
+}
+
 export function nnIps(networkNumber: number): NNIPsResult {
   const routerDHCPIP = IPv4.parse(`10.${96 + (networkNumber >> 10)}.${(networkNumber >> 2) & 255}.${(((networkNumber & 3) << 6) + 1)}`);
 
@@ -13,15 +22,13 @@ export function nnIps(networkNumber: number): NNIPsResult {
   const dhcpPoolEnd = IPv4.parse(`10.${96 + (networkNumber >> 10)}.${(networkNumber >> 2) & 255}.${(((networkNumber & 3) << 6) + POOL_END_REL)}`);
 
   const otherAddresses: ExplainedAddress[] = [];
-
-  const nnFirstPart = Math.floor(networkNumber / 100);
   const nnSecondPart = networkNumber % 100;
 
-  otherAddresses.push({  address: IPv4.parse(`10.68.${nnFirstPart}.${nnSecondPart}`), description: "Primary router OSPF address on the WDS bridge" });
-  otherAddresses.push({  address: IPv4.parse(`10.69.${nnFirstPart}.${nnSecondPart}`), description: "Primary router OSPF address on the mesh bridge" });
-  otherAddresses.push({  address: IPv4.parse(`10.69.${nnFirstPart}.1${nnSecondPart.toString().padStart(2, '0')}`), description: "Secondary router OSPF address on the mesh bridge (not common)" });
+  otherAddresses.push({  address: ospfIP(networkNumber, 0, true), description: "Primary router OSPF address on the WDS bridge" });
+  otherAddresses.push({  address: ospfIP(networkNumber, 0), description: "Primary router OSPF address on the mesh bridge" });
+  otherAddresses.push({  address: ospfIP(networkNumber, 1, true), description: "Secondary router OSPF address on the mesh bridge (not common)" });
 
-  if (nnSecondPart <= THRID_IP_CUTOFF) otherAddresses.push({  address: IPv4.parse(`10.69.${nnFirstPart}.2${nnSecondPart.toString().padStart(2, '0')}`), description: "Tertiary router OSPF address on the mesh bridge (very rare)" });
+  if (nnSecondPart <= THRID_IP_CUTOFF) otherAddresses.push({  address: ospfIP(networkNumber, 2), description: "Tertiary router OSPF address on the mesh bridge (very rare)" });
 
   return {
     addresses: otherAddresses,
