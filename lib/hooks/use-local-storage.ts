@@ -47,7 +47,11 @@ export function useLocalStorage<T>(key: string, initialValue?: T | (() => T)): [
 
         // Save to localStorage
         if (typeof window !== "undefined") {
-          window.localStorage.setItem(key, JSON.stringify(valueToStore))
+          if (valueToStore !== undefined) {
+            window.localStorage.setItem(key, JSON.stringify(valueToStore))
+          } else {
+            window.localStorage.removeItem(key)
+          }
 
           // Dispatch a custom event so other instances of the hook know to update
           window.dispatchEvent(new Event("local-storage-change"))
