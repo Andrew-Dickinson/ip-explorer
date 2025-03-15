@@ -3,6 +3,8 @@
 import { IPv4, parseCIDR } from "ipaddr.js"
 import {createParallelAction} from "next-server-actions-parallel";
 import {ActionResult} from "@/lib/types";
+import {incrementRateCounter} from "@/lib/rate-limits";
+import {EndpointName} from "@/lib/constants";
 
 const OSPF_ENDPOINT= "https://api.andrew.mesh.nycmesh.net/api/v1/mesh_ospf_data.json";
 
@@ -39,6 +41,13 @@ interface OspfData {
  * @returns Object containing information about the advertisement
  */
 async function checkOspfAdvertisementInner(ipAddress: string): Promise<OspfLookupResult> {
+  // Check if the request is rate limited
+  try {
+    await incrementRateCounter(EndpointName.OSPF_LOOKUP);
+  } catch {
+    return {routerIds: [], rateLimit: true};
+  }
+
   try {
     // Validate IP address format
     if (!IPv4.isValidFourPartDecimal(ipAddress)) {

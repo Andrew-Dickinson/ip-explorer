@@ -6,6 +6,8 @@ import {IPv4} from "ipaddr.js";
 import {analyzeStatic} from "@/lib/analyzers/static";
 import {createParallelAction} from "next-server-actions-parallel";
 import {ActionResult} from "@/lib/types";
+import {incrementRateCounter} from "@/lib/rate-limits";
+import {EndpointName} from "@/lib/constants";
 
 const execAsync = promisify(exec)
 
@@ -31,6 +33,13 @@ const isExecError = (err: unknown): err is Error & { stdout: string } => {
  * @returns Object containing reachability status and latency information
  */
 async function checkIcmpReachabilityInner(ipAddress: string): Promise<PingResult> {
+  // Check if the request is rate limited
+  try {
+    await incrementRateCounter(EndpointName.ICMP_PING);
+  } catch {
+    return {rateLimit: true};
+  }
+
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {
     throw new Error("Invalid IP address format")
   }

@@ -4,6 +4,8 @@ import { IPv4 } from "ipaddr.js"
 import { google } from "googleapis"
 import {createParallelAction} from "next-server-actions-parallel";
 import {ActionResult} from "@/lib/types";
+import {checkToken} from "@/lib/check-token";
+import {EndpointName} from "@/lib/constants";
 
 export interface IpHostData {
   rowNum: number
@@ -116,9 +118,13 @@ function normalizeIp(ip: string): string {
  * @returns Object containing information about the matching host if found
  */
 export async function checkIpHostInner(ipAddress: string, token: string): Promise<IpHostLookupResult> {
-  // Validate token
-  if (token !== process.env.SECURE_CONTENT_TOKEN) {
-    return {found: false, invalidToken: true};
+  // Validate token (and do rate limiting)
+  try {
+    if (await checkToken(token, EndpointName.IP_RANGES_HOSTS)) {
+      return {found: false, invalidToken: true};
+    }
+  } catch {
+    return {found: false, rateLimit: true};
   }
 
   try {

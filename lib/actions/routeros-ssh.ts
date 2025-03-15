@@ -8,6 +8,8 @@ import {SshClient} from "@/lib/ssh-helper";
 import {get_bridge_host} from "@/lib/routeros_scripts/get_bridge_hosts_match";
 import {createParallelAction} from "next-server-actions-parallel";
 import {ActionResult, JSONCompatible} from "@/lib/types";
+import {checkToken} from "@/lib/check-token";
+import {EndpointName} from "@/lib/constants";
 
 
 export interface DhcpLeaseInfo {
@@ -80,9 +82,13 @@ export async function lookupDhcpLeaseInner(
   ospfResult: JSONCompatible<OspfLookupResult>,
   token: string,
 ): Promise<DhcpLeaseLookupResult> {
-  // Validate token
-  if (token !== process.env.SECURE_CONTENT_TOKEN) {
-    return {connectionSuccess: false, invalidToken: true};
+  // Validate token (and do rate limiting)
+  try {
+    if (await checkToken(token, EndpointName.ROUTEROS_SSH_DHCP)) {
+      return {connectionSuccess: false, invalidToken: true};
+    }
+  } catch {
+    return {connectionSuccess: false, rateLimit: true};
   }
 
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {

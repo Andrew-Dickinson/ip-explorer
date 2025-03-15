@@ -8,6 +8,8 @@ import { getDeviceInfo } from "snmp-sysobjectid"
 import moment from "moment";
 import {createParallelAction} from "next-server-actions-parallel";
 import {ActionResult} from "@/lib/types";
+import {incrementRateCounter} from "@/lib/rate-limits";
+import {EndpointName} from "@/lib/constants";
 
 const SNMP_COMMUNITY = "public";
 
@@ -114,6 +116,13 @@ function parseSnmpValue(varbind: snmp.VarBind): { value: string | number | boole
 async function performSnmpQueryInner(
   ipAddress: string,
 ): Promise<SnmpQueryResult> {
+  // Check if the request is rate limited
+  try {
+    await incrementRateCounter(EndpointName.SNMP_QUERY);
+  } catch {
+    return {results: [], rateLimit: true};
+  }
+
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {
     throw new Error("Invalid IP address format")
   }

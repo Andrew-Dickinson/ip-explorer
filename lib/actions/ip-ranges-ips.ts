@@ -4,6 +4,8 @@ import { IPv4, parseCIDR } from "ipaddr.js"
 import { google } from "googleapis"
 import {createParallelAction} from "next-server-actions-parallel";
 import {ActionResult} from "@/lib/types";
+import {checkToken} from "@/lib/check-token";
+import {EndpointName} from "@/lib/constants";
 
 
 export interface IpRangeData {
@@ -119,9 +121,13 @@ async function fetchIpRangeData(): Promise<IpRangeData[]> {
  * @returns Object containing information about the matching range if found
  */
 async function checkIpRangeInner(ipAddress: string, token: string): Promise<IpRangeLookupResult> {
-  // Validate token
-  if (token !== process.env.SECURE_CONTENT_TOKEN) {
-    return {found: false, invalidToken: true};
+  // Validate token (and do rate limiting)
+  try {
+    if (await checkToken(token, EndpointName.IP_RANGES_RANGES)) {
+      return {found: false, invalidToken: true};
+    }
+  } catch {
+    return {found: false, rateLimit: true};
   }
 
 

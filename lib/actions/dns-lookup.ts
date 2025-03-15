@@ -1,10 +1,12 @@
 "use server"
 
-import { IPv4 } from "ipaddr.js"
-import { analyzeStatic } from "@/lib/analyzers/static"
+import {IPv4} from "ipaddr.js"
+import {analyzeStatic} from "@/lib/analyzers/static"
 import dns from "dns"
 import {createParallelAction} from "next-server-actions-parallel";
 import {ActionResult} from "@/lib/types";
+import {incrementRateCounter} from "@/lib/rate-limits";
+import {EndpointName} from "@/lib/constants";
 
 
 const MESH_AUTHORITATIVE_DNS_SERVER_ADDRESS = "23.158.16.23";
@@ -27,6 +29,13 @@ export interface DnsLookupResult extends ActionResult {
  * @returns Object containing the hostname if found
  */
 export async function performReverseDnsLookupInner(ipAddress: string): Promise<DnsLookupResult> {
+  try {
+    // Check if the request is rate limited
+    await incrementRateCounter(EndpointName.REVERSE_DNS);
+  } catch {
+    return {hostnames: [], success: false, rateLimit: true};
+  }
+
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {
     throw new Error("Invalid IP address format")
   }

@@ -4,6 +4,8 @@ import { IPv4 } from "ipaddr.js"
 import { analyzeStatic } from "@/lib/analyzers/static"
 import {ActionResult, PortStatus} from "../types"
 import {createParallelAction} from "next-server-actions-parallel";
+import {incrementRateCounter} from "@/lib/rate-limits";
+import {EndpointName} from "@/lib/constants";
 
 export interface TcpCheckResult {
   port: number
@@ -74,6 +76,13 @@ async function checkSinglePort(ipAddress: string, port: number, timeout = 2000):
  * @returns Object containing results for all ports
  */
 async function checkTcpConnectivityInner(ipAddress: string, ports: number[]): Promise<TcpConnectivityResult> {
+  // Check if the request is rate limited
+  try {
+    await incrementRateCounter(EndpointName.TCP_SCAN);
+  } catch {
+    return {results: [], rateLimit: true};
+  }
+
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {
     throw new Error("Invalid IP address format")
   }

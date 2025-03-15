@@ -3,10 +3,11 @@
 import { IPv4 } from "ipaddr.js"
 import { Agent } from "undici"
 import UISP_CERT from "@/lib/certificates/uisp.mesh.nycmesh.net.pem"
-import { UISP_API_URL } from "@/lib/constants"
+import {EndpointName, UISP_API_URL} from "@/lib/constants"
 import { isUispDeviceArray, type UispDevice } from "@/types/uisp"
 import { createParallelAction } from "next-server-actions-parallel"
 import {ActionResult} from "@/lib/types";
+import {checkToken} from "@/lib/check-token";
 
 // Cache structure for device data
 interface DeviceCache {
@@ -132,9 +133,13 @@ async function fetchUispDevices(): Promise<UispDevice[]> {
  * @returns Array of devices matching the IP address
  */
 async function lookupUispDeviceByIpInner(ipAddress: string, token: string): Promise<UispDeviceResult> {
-  // Validate token
-  if (token !== process.env.SECURE_CONTENT_TOKEN) {
-    return {devices: [], invalidToken: true};
+  // Validate token (and do rate limiting)
+  try {
+    if (await checkToken(token, EndpointName.UISP)) {
+      return {devices: [], invalidToken: true};
+    }
+  } catch {
+    return {devices: [], rateLimit: true};
   }
 
   // Validate IP address format

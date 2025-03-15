@@ -45,6 +45,9 @@ export function useNextParallelDataAction<T, U extends JSONSerializable<never>[]
             if (secureContentToken) {
               setSecureContentToken(undefined);
             }
+          } else if ('rateLimit' in result && result.rateLimit) {
+            setError({message: "Too many requests. Try back in a few minutes"})
+            setResult(undefined)
           } else {
             setResult(result)
           }
