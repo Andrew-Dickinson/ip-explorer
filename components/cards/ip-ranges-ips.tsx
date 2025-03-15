@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {AlertTriangle, Info, Tag, User, Layers, FileText, Table2} from "lucide-react"
 import { checkIpRange } from "@/lib/actions/ip-ranges-ips"
 import type { IPv4 } from "ipaddr.js"
-import {PSK_STORAGE_KEY} from "@/lib/constants";
+import {TOKEN_STORAGE_KEY} from "@/lib/constants";
 import {useLocalStorage} from "@/lib/hooks/use-local-storage";
 import {SecureCard} from "@/components/cards/secure-card";
 import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
@@ -25,12 +25,13 @@ export function IpRangesIps({
   lastRefresh,
   ...props
 }: IpRangeLookupCardProps) {
-  const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
+  const secureContentToken = useLocalStorage<string>(TOKEN_STORAGE_KEY)[0];
 
   const [lookupResult, isLoading, error] = useNextParallelDataAction(
     checkIpRange,
-    [ipAddress.toString(), secureContentPSK ?? ""],
+    [ipAddress.toString(), secureContentToken ?? ""],
     lastRefresh,
+    !!ipAddress?.toString() && !!secureContentToken
   );
 
   return (

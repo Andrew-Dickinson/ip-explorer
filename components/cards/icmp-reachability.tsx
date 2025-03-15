@@ -27,6 +27,7 @@ export function IcmpReachability({
     checkIcmpReachability,
     [ipAddress.toString()],
     lastRefresh,
+    !!ipAddress?.toString()
   );
 
   return (

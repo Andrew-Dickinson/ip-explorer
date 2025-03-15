@@ -72,17 +72,17 @@ function parseRouterOsAsValue(output: string): Record<string, string>[] {
  * Looks up DHCP lease information for an IP address by SSH'ing into a router
  * @param ipAddress The IP address to look up
  * @param ospfResult The OSPF lookup result containing the router ID
- * @param psk The pre-shared key to access this endpoint
+ * @param token The authentication token to access this endpoint
  * @returns DHCP lease information if found
  */
 export async function lookupDhcpLeaseInner(
   ipAddress: string,
   ospfResult: JSONCompatible<OspfLookupResult>,
-  psk: string,
+  token: string,
 ): Promise<DhcpLeaseLookupResult> {
-  // Validate PSK
-  if (psk !== process.env.SECURE_CONTENT_PSK) {
-    throw new Error("Invalid psk");
+  // Validate token
+  if (token !== process.env.SECURE_CONTENT_TOKEN) {
+    return {connectionSuccess: false, invalidToken: true};
   }
 
   if (!IPv4.isValidFourPartDecimal(ipAddress)) {

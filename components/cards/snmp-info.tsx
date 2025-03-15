@@ -49,6 +49,7 @@ export function SnmpInfo({
     performSnmpQuery,
     [ipAddress.toString()],
     lastRefresh,
+    !!ipAddress?.toString()
   );
 
   return (

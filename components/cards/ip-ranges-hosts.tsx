@@ -4,7 +4,7 @@ import type React from "react"
 import {MapPin, Server, User, FileText, Table2, Wrench} from "lucide-react"
 import { checkIpHost } from "@/lib/actions/ip-ranges-hosts"
 import type { IPv4 } from "ipaddr.js"
-import {PSK_STORAGE_KEY} from "@/lib/constants";
+import {TOKEN_STORAGE_KEY} from "@/lib/constants";
 import {useLocalStorage} from "@/lib/hooks/use-local-storage";
 import {SecureCard} from "@/components/cards/secure-card";
 import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
@@ -24,15 +24,16 @@ export function IpRangesHosts({
   lastRefresh,
   ...props
 }: IpHostsLookupCardProps) {
-  const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
+  const secureContentToken = useLocalStorage<string>(TOKEN_STORAGE_KEY)[0];
 
   const [lookupResult, isLoading, error] = useNextParallelDataAction(
     checkIpHost,
-    [ipAddress.toString(), secureContentPSK ?? ""],
+    [ipAddress.toString(), secureContentToken ?? ""],
     lastRefresh,
+    !!ipAddress?.toString() && !!secureContentToken
   );
 
-  if (secureContentPSK && (isLoading || error || !lookupResult?.hostData)) {
+  if (secureContentToken && (isLoading || error || !lookupResult?.hostData)) {
     return <></>
   }
 

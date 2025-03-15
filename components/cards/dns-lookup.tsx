@@ -27,6 +27,7 @@ export function DnsLookup({
     performReverseDnsLookup,
     [ipAddress.toString()],
     lastRefresh,
+    !!ipAddress?.toString()
   );
 
   return (

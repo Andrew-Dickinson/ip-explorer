@@ -31,6 +31,7 @@ export function TcpConnectivity({
     checkTcpConnectivity,
     [ipAddress.toString(), ports],
     lastRefresh,
+    !!ipAddress?.toString() && !!ports
   );
 
   return (

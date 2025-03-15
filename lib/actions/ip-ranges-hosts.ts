@@ -112,13 +112,13 @@ function normalizeIp(ip: string): string {
 /**
  * Checks if an IP address matches any host in the Google Sheet
  * @param ipAddress The IP address to check
- * @param psk The pre-shared key to access this endpoint
+ * @param token The authentication token to access this endpoint
  * @returns Object containing information about the matching host if found
  */
-export async function checkIpHostInner(ipAddress: string, psk: string): Promise<IpHostLookupResult> {
-  // Validate PSK
-  if (psk !== process.env.SECURE_CONTENT_PSK) {
-    throw new Error("Invalid psk");
+export async function checkIpHostInner(ipAddress: string, token: string): Promise<IpHostLookupResult> {
+  // Validate token
+  if (token !== process.env.SECURE_CONTENT_TOKEN) {
+    return {found: false, invalidToken: true};
   }
 
   try {

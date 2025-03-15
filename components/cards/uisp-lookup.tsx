@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { AlertTriangle, Wifi, Server } from "lucide-react"
 import { lookupUispDeviceByIp } from "@/lib/actions/uisp"
 import {IPv4} from "ipaddr.js";
-import {PSK_STORAGE_KEY, UISP_URL} from "@/lib/constants";
+import {TOKEN_STORAGE_KEY, UISP_URL} from "@/lib/constants";
 import {SecureCard} from "@/components/cards/secure-card";
 import {useLocalStorage} from "@/lib/hooks/use-local-storage";
 import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
@@ -25,13 +25,14 @@ export function UispLookup({
   lastRefresh,
   ...props
 }: UispLookupCardProps) {
-  const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
+  const secureContentToken = useLocalStorage<string>(TOKEN_STORAGE_KEY)[0];
 
   const ipAddrString = ipAddress.toString();
   const [uispResult, isLoading, error] = useNextParallelDataAction(
     lookupUispDeviceByIp,
-    [ipAddrString, secureContentPSK ?? ""],
+    [ipAddrString, secureContentToken ?? ""],
     lastRefresh,
+    !!ipAddress?.toString() && !!secureContentToken
   );
 
   return (

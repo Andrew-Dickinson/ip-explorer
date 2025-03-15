@@ -67,6 +67,7 @@ export interface NNIPsResult {
 
 export interface ActionResult {
   error?: string;
+  invalidToken?: boolean;
 }
 
 

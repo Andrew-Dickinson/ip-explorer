@@ -65,7 +65,8 @@ export default function Explorer() {
   const [ospfLookupResult, ospfQueryLoading, ospfError] = useNextParallelDataAction(
     checkOspfAdvertisement,
     [parsedAddress?.toString() ?? ""],
-    lastRefresh
+    lastRefresh,
+    !!parsedAddress?.toString()
   );
 
   const masonryRef = useRef<HTMLDivElement>(null);

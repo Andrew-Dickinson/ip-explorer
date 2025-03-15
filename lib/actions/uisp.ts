@@ -128,13 +128,13 @@ async function fetchUispDevices(): Promise<UispDevice[]> {
 /**
  * Looks up UISP devices by IP address
  * @param ipAddress The IP address to search for
- * @param psk The pre-shared key to access this endpoint
+ * @param token The authentication token to access this endpoint
  * @returns Array of devices matching the IP address
  */
-async function lookupUispDeviceByIpInner(ipAddress: string, psk: string): Promise<UispDeviceResult> {
-  // Validate PSK
-  if (psk !== process.env.SECURE_CONTENT_PSK) {
-    throw new Error("Invalid psk");
+async function lookupUispDeviceByIpInner(ipAddress: string, token: string): Promise<UispDeviceResult> {
+  // Validate token
+  if (token !== process.env.SECURE_CONTENT_TOKEN) {
+    return {devices: [], invalidToken: true};
   }
 
   // Validate IP address format

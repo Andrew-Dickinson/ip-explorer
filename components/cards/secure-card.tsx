@@ -17,9 +17,9 @@ import { Label } from "@/components/ui/label"
 import {Loader2, Lock} from "lucide-react"
 import {cn} from "@/lib/utils";
 import {runParallelAction} from "next-server-actions-parallel";
-import {checkPassword} from "@/lib/actions/check-password";
+import {getToken} from "@/lib/actions/get-token";
 import {useLocalStorage} from "@/lib/hooks/use-local-storage";
-import {PSK_STORAGE_KEY} from "@/lib/constants";
+import {TOKEN_STORAGE_KEY} from "@/lib/constants";
 
 export interface SecureCardProps extends React.ComponentProps<"div"> {
   title?: string
@@ -39,7 +39,7 @@ export function SecureCard({
                              className,
                              ...props
                            }: SecureCardProps) {
-  const [secureContentPSK, setSecureContentPSK] = useLocalStorage<string>(PSK_STORAGE_KEY);
+  const [secureContentToken, setSecureContentToken] = useLocalStorage<string>(TOKEN_STORAGE_KEY);
 
   const [pendingAuthResponse, setPendingAuthResponse] = useState(false);
   const [authError, setAuthError] = useState(false);
@@ -55,9 +55,9 @@ export function SecureCard({
     setAuthError(false);
     setInvalidPassword(false);
     try {
-      const pwCorrect = await runParallelAction(checkPassword(inputPassword));
-      if (pwCorrect) {
-        setSecureContentPSK(inputPassword);
+      const token = await runParallelAction(getToken(inputPassword));
+      if (token !== undefined) {
+        setSecureContentToken(token);
         setIsDialogOpen(false);
       } else {
         setInvalidPassword(true);
@@ -76,7 +76,7 @@ export function SecureCard({
         <CardDescription className="text-xs">{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        {secureContentPSK === undefined ? (
+        {secureContentToken === undefined ? (
           <>
             <div className="flex items-center gap-3">
               <StaticSkeleton className="h-10 w-10 rounded-full" />

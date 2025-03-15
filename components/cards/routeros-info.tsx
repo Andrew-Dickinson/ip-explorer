@@ -14,7 +14,7 @@ import {
 import { lookupDhcpLease } from "@/lib/actions/routeros-ssh"
 import type { OspfLookupResult } from "@/lib/actions/ospf"
 import type { IPv4 } from "ipaddr.js"
-import {PSK_STORAGE_KEY} from "@/lib/constants";
+import {TOKEN_STORAGE_KEY} from "@/lib/constants";
 import {useLocalStorage} from "@/lib/hooks/use-local-storage";
 import {SecureCard} from "@/components/cards/secure-card";
 import {useNextParallelDataAction} from "@/lib/hooks/use-next-data-action";
@@ -36,7 +36,7 @@ export function DhcpLeaseLookup({
   lastRefresh,
   ...props
 }: DhcpLeaseLookupCardProps) {
-  const secureContentPSK = useLocalStorage<string>(PSK_STORAGE_KEY)[0];
+  const secureContentToken = useLocalStorage<string>(TOKEN_STORAGE_KEY)[0];
 
   // Only proceed if we have a router ID from OSPF
   // if (ospfResult.routerIds.length !== 1) {
@@ -47,8 +47,9 @@ export function DhcpLeaseLookup({
 
   const [lookupResult, isLoading, error] = useNextParallelDataAction(
     lookupDhcpLease,
-    [ipAddress.toString(), ospfResult, secureContentPSK ?? ""],
+    [ipAddress.toString(), ospfResult, secureContentToken ?? ""],
     lastRefresh,
+    !!ipAddress?.toString() && !!secureContentToken
   );
 
   // if (!result.connectionSuccess) {
