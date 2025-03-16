@@ -47,7 +47,7 @@ export function DhcpLeaseLookup({
 
   const [lookupResult, isLoading, error] = useNextParallelDataAction(
     lookupDhcpLease,
-    [ipAddress.toString(), ospfResult, secureContentToken ?? ""],
+    [ipAddress.toString(), secureContentToken ?? ""],
     lastRefresh,
     !!ipAddress?.toString() && !!secureContentToken
   );

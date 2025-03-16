@@ -1,13 +1,13 @@
 "use server"
 
-import type { OspfLookupResult } from '@/lib/actions/ospf'
+import {checkOspfAdvertisementInner} from '@/lib/actions/ospf'
 import {IPv4} from "ipaddr.js";
 import {analyzeStatic} from "@/lib/analyzers/static";
 import {get_dhcp_match} from "@/lib/routeros_scripts/get_dhcp_match";
 import {SshClient} from "@/lib/ssh-helper";
 import {get_bridge_host} from "@/lib/routeros_scripts/get_bridge_hosts_match";
 import {createParallelAction} from "next-server-actions-parallel";
-import {ActionResult, JSONCompatible} from "@/lib/types";
+import {ActionResult} from "@/lib/types";
 import {checkToken} from "@/lib/check-token";
 import {EndpointName} from "@/lib/constants";
 
@@ -79,7 +79,6 @@ function parseRouterOsAsValue(output: string): Record<string, string>[] {
  */
 export async function lookupDhcpLeaseInner(
   ipAddress: string,
-  ospfResult: JSONCompatible<OspfLookupResult>,
   token: string,
 ): Promise<DhcpLeaseLookupResult> {
   // Validate token (and do rate limiting)
@@ -100,6 +99,9 @@ export async function lookupDhcpLeaseInner(
   const parsedAddress = IPv4.parse(ipAddress);
   analyzeStatic(parsedAddress);
 
+  // Do our own lookup of the OSPF router that advertises this IP, so the frontend can't lie to us
+  const ospfResult =  await checkOspfAdvertisementInner(ipAddress);
+
   // Check if we have a router ID from OSPF
   if (ospfResult.routerIds.length === 0) {
     return {
@@ -116,6 +118,17 @@ export async function lookupDhcpLeaseInner(
 
   // Get SSH credentials from environment variables
   const host = ospfResult.routerIds[0]
+
+  //Validate that the host corresponds to a valid IPv4 address
+  if (!IPv4.isValidFourPartDecimal(host)) {
+    throw new Error("Invalid Router ID format")
+  }
+
+  // Throws for non-mesh addresses, so we can't be coaxed into
+  // sending traffic out of the mesh
+  const parsedHostAddr = IPv4.parse(host);
+  analyzeStatic(parsedHostAddr);
+
   const username = process.env.ROUTEROS_SSH_USER
   const password = process.env.ROUTEROS_SSH_PASSWORD
 

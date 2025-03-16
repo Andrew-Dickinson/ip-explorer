@@ -40,7 +40,7 @@ interface OspfData {
  * @param ipAddress The IP address to check
  * @returns Object containing information about the advertisement
  */
-async function checkOspfAdvertisementInner(ipAddress: string): Promise<OspfLookupResult> {
+export async function checkOspfAdvertisementInner(ipAddress: string): Promise<OspfLookupResult> {
   // Check if the request is rate limited
   try {
     await incrementRateCounter(EndpointName.OSPF_LOOKUP);
