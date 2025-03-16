@@ -5,7 +5,7 @@ import { IpExplainerCard } from "@/components/cards/ip-explainer"
 import React, {useEffect, useRef, useState, useMemo, useCallback} from "react"
 import { IPv4 } from "ipaddr.js"
 import { analyzeStatic } from "@/lib/analyzers/static"
-import { AddressType } from "@/lib/types"
+import {AddressProvenance, AddressType} from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -94,6 +94,8 @@ export default function Explorer() {
       else if (window.innerWidth >= 1636) columns = 3 // ~3xl
       else if (window.innerWidth >= 1024) columns = 2  // ~lg
 
+      if (items.length < columns) columns = items.length
+
       let maxHeight = 0
       let currentCol = 0
       const colHeights = Array(columns).fill(0)
@@ -108,6 +110,8 @@ export default function Explorer() {
         item.style.left = `${(100 / columns) * currentCol}%`
         item.style.width = `${100 / columns - 2}%`
 
+        if (columns == 1) item.style.width = `100%`
+
         // Update the height of the current column
         colHeights[currentCol] += item.offsetHeight + 16 // 16px for margin
 
@@ -118,6 +122,14 @@ export default function Explorer() {
       // Set the container height
       container.style.height = `${maxHeight}px`
       container.style.position = "relative"
+      container.classList.add("mx-auto");
+
+      // Center single column when needed
+      if (columns == 1) {
+        container.style.maxWidth = `500px`
+      } else {
+        container.style.maxWidth = "";
+      }
     }
 
     // Initial update
@@ -149,7 +161,7 @@ export default function Explorer() {
             <div className="space-y-4">
               <div className={"mb-8"}>
                 <div className="mx-auto max-w-[500px]">
-                  <div className="space-y-4 md:-ml-5">
+                  <div className="space-y-4">
                     <h2 className={"font-bold text-2xl"}>
                       <img src={"NYC_Mesh_logo.svg"} alt={"NYC Mesh Logo"} className="h-10 inline mr-1 -mt-1"/> NYC Mesh{" "}
                       <span className={"font-normal"}>|</span> <span className={"font-normal"}>IP Explorer</span>
@@ -205,30 +217,30 @@ export default function Explorer() {
                   </div>
                 </div>
               </div>
-              {parsedAddress && staticResult?.addressProvenance === undefined && (
-                <div className={"max-w-[470px] mx-auto"}>
-                  <Card className={"-ml-9 -mt-3"}>
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-5">
-                          <div
-                            className="h-10 w-10 rounded-full bg-red-100 flex flex-none items-center justify-center">
-                            <Ban className="h-5 w-5 text-red-600"/>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="font-medium">Invalid Address</p>
-                            <p className="text-xs text-muted-foreground">
-                              This doesn&#39;t look like a valid NYC Mesh IP address. Please check that the entered
-                              address is correct and try again
-                            </p>
+              <div className={styles.masonry} style={{height: "auto", maxHeight: "none"}} ref={masonryRef}>
+                {parsedAddress && staticResult?.addressProvenance === undefined && (
+                  <div className={styles.masonryItem}>
+                    <Card className={"-mt-3"}>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-5">
+                            <div
+                              className="h-10 w-10 rounded-full bg-red-100 flex flex-none items-center justify-center">
+                              <Ban className="h-5 w-5 text-red-600"/>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-medium">Invalid Address</p>
+                              <p className="text-xs text-muted-foreground">
+                                This doesn&#39;t look like a valid NYC Mesh IP address. Please check that the entered
+                                address is correct and try again
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-              <div className={styles.masonry} style={{height: "auto", maxHeight: "none"}} ref={masonryRef}>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
                 {parsedAddress && staticResult ? (
                   <div className={styles.masonryItem}>
                     <IpExplainerCard {...staticResult} />
@@ -242,7 +254,8 @@ export default function Explorer() {
                          lastRefresh={lastRefresh}
                          updateParsedAddress={setParsedAddress}/>
                 </div>
-                {parsedAddress && staticResult?.addressProvenance !== undefined ? (
+                {parsedAddress && staticResult?.addressProvenance
+                    && [AddressProvenance.MESH_RFC_1918, AddressProvenance.MESH_PUBLIC].includes(staticResult.addressProvenance)  ? (
                   <>
                     <div className={styles.masonryItem}>
                       <OspfLookup
