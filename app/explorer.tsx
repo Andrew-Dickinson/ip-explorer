@@ -305,19 +305,19 @@ export default function Explorer() {
                 Outage Simulator
               </a>
               <a
-                href="http://api.andrew.mesh.nycmesh.net/api/v1/mesh_ospf_data.json"
+                href="https://api.andrew.mesh.nycmesh.net/api/v1/mesh_ospf_data.json"
                 className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
               >
                 OSPF API v1
               </a>
               <a
-                href="http://api.andrew.mesh.nycmesh.net/api/v2/mesh_ospf_data.json"
+                href="https://api.andrew.mesh.nycmesh.net/api/v2/mesh_ospf_data.json"
                 className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
               >
                 OSPF API v2
               </a>
               <a
-                href="http://api.andrew.mesh.nycmesh.net/api/v2/ospf-event-stream/viewer.html"
+                href="https://api.andrew.mesh.nycmesh.net/api/v2/ospf-event-stream/viewer.html"
                 className="mt-0.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
               >
                 OSPF Event Feed
