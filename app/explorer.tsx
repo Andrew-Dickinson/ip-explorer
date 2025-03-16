@@ -90,7 +90,7 @@ export default function Explorer() {
       let currentCol = 0
       const colHeights = Array(columns).fill(0)
 
-      items.forEach((item) => {
+      items.values().filter((item) => item.className.indexOf("hidden") == -1).forEach((item) => {
         // Find the column with the smallest height
         currentCol = colHeights.indexOf(Math.min(...colHeights))
 
@@ -139,62 +139,87 @@ export default function Explorer() {
         <main className="flex flex-col gap-8 row-start-2 w-full items-center sm:items-start">
           <div className="w-full mx-auto p-6 space-y-6 max-w-2xl lg:max-w-none">
             <div className="space-y-4">
-              <div className={"mr-9 mb-8"}>
-                <div className="space-y-4 mx-auto max-w-[500px]">
-                  <h2 className={"font-bold text-2xl"}>
-                    <img src={"NYC_Mesh_logo.svg"} alt={"NYC Mesh Logo"} className="h-10 inline mr-1 -mt-1"/> NYC Mesh{" "}
-                    <span className={"font-normal"}>|</span> <span className={"font-normal"}>IP Explorer</span>
-                  </h2>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="text"
-                      placeholder="Enter IP address..."
-                      className="text-lg max-w-md"
-                      value={inputAddress}
-                      onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setInputAddress(e.target.value)
-                        if (e.target.value === "") {
-                          setParsedAddress(null)
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && inputAddressValid) {
-                          setLastRefresh(new Date());
+              <div className={"mb-8"}>
+                <div className="mx-auto max-w-[500px]">
+                  <div className="space-y-4 -ml-5">
+                    <h2 className={"font-bold text-2xl"}>
+                      <img src={"NYC_Mesh_logo.svg"} alt={"NYC Mesh Logo"} className="h-10 inline mr-1 -mt-1"/> NYC Mesh{" "}
+                      <span className={"font-normal"}>|</span> <span className={"font-normal"}>IP Explorer</span>
+                    </h2>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        placeholder="Enter IP address..."
+                        className="text-lg max-w-md"
+                        value={inputAddress}
+                        onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          setInputAddress(e.target.value)
+                          if (e.target.value === "") {
+                            setParsedAddress(null)
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && inputAddressValid) {
+                            setLastRefresh(new Date());
+                            setParsedAddress(IPv4.parse(inputAddress))
+                          }
+                        }}
+                      />
+                      <Button
+                        variant={"default"}
+                        icon={!inputAddressValid || inputAddress !== parsedAddress?.toString() ? ArrowRight : RefreshCcw}
+                        disabled={!inputAddressValid}
+                        onClick={() => {
+                          setLastRefresh(new Date())
                           setParsedAddress(IPv4.parse(inputAddress))
-                        }
-                      }}
-                    />
-                    <Button
-                      variant={"default"}
-                      icon={!inputAddressValid || inputAddress !== parsedAddress?.toString() ? ArrowRight : RefreshCcw}
-                      disabled={!inputAddressValid}
-                      onClick={() => {
-                        setLastRefresh(new Date())
-                        setParsedAddress(IPv4.parse(inputAddress))
-                      }}
-                    />
+                        }}
+                      />
+                    </div>
+                    {!parsedAddress && (
+                      <Sheet>
+                        <SheetTrigger asChild>
+                          <Button variant={"secondary"} icon={Lightbulb}>
+                            Examples
+                          </Button>
+                        </SheetTrigger>
+                        <SheetContent className="w-[100vw] sm:max-w-2xl">
+                          <SheetHeader>
+                            <SheetTitle>Address Breakdown Examples</SheetTitle>
+                          </SheetHeader>
+                          <ScrollArea className="h-full">
+                            <div className="max-w-[590px] mx-auto">
+                              <IPExplainerExamples/>
+                            </div>
+                          </ScrollArea>
+                        </SheetContent>
+                      </Sheet>
+                    )}
                   </div>
-                  {!parsedAddress && (
-                    <Sheet>
-                      <SheetTrigger asChild>
-                        <Button variant={"secondary"} icon={Lightbulb}>
-                          Examples
-                        </Button>
-                      </SheetTrigger>
-                      <SheetContent className="w-[100vw] sm:max-w-2xl">
-                        <SheetHeader>
-                          <SheetTitle>Address Breakdown Examples</SheetTitle>
-                        </SheetHeader>
-                        <ScrollArea className="h-full">
-                          <div className="max-w-[590px] mx-auto">
-                            <IPExplainerExamples/>
-                          </div>
-                        </ScrollArea>
-                      </SheetContent>
-                    </Sheet>
-                  )}
                 </div>
               </div>
+              {parsedAddress && staticResult?.addressProvenance === undefined && (
+                <div className={"max-w-[470px] mx-auto"}>
+                  <Card className={"-ml-9 -mt-3"}>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-5">
+                          <div
+                            className="h-10 w-10 rounded-full bg-red-100 flex flex-none items-center justify-center">
+                            <Ban className="h-5 w-5 text-red-600"/>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="font-medium">Invalid Address</p>
+                            <p className="text-xs text-muted-foreground">
+                              This doesn&#39;t look like a valid NYC Mesh IP address. Please check that the entered
+                              address is correct and try again
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
               {parsedAddress && (
                 <div className={styles.masonry} style={{height: "auto", maxHeight: "none"}} ref={masonryRef}>
                   {parsedAddress && staticResult ? (
@@ -202,33 +227,11 @@ export default function Explorer() {
                       <IpExplainerCard {...staticResult} />
                     </div>
                   ) : (
-                    parsedAddress && (
-                      <div className={styles.masonryItem}>
-                        <Card className={"max-w-lg"}>
-                          <CardContent>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-5">
-                                <div
-                                  className="h-10 w-10 rounded-full bg-red-100 flex flex-none items-center justify-center">
-                                  <Ban className="h-5 w-5 text-red-600"/>
-                                </div>
-                                <div className="space-y-1">
-                                  <p className="font-medium">Invalid Address</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    This doesn&#39;t look like a valid NYC Mesh IP address. Please check that the entered
-                                    address is correct and try again
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    )
+                    <></>
                   )}
                   {parsedAddress && staticResult?.addressProvenance !== undefined ? (
                     <>
-                      <div className={styles.masonryItem}>
+                      <div className={styles.masonryItem + (!staticResult.networkNumber ? " hidden" : "")}>
                         <NnMap networkNumber={staticResult.networkNumber} lastRefresh={lastRefresh}
                                updateParsedAddress={setParsedAddress}/>
                       </div>
