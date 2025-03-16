@@ -2,7 +2,7 @@
 # IP Explorer
 
 A discovery and diagnostics tool which analyzes NYC Mesh IP addresses and shows the user useful information about them.
-Pulls from a variety of data sources to make the folowing information available:
+Pulls from a variety of data sources to make the following information available:
 
 - ✅ Network Number (and address breakdown)
 - ✅ Other IP addresses for this node
