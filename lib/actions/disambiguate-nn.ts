@@ -5,7 +5,7 @@ import {incrementRateCounter} from "@/lib/rate-limits";
 import {EndpointName} from "@/lib/constants";
 import {DisambiguateNumberSuccessResponse, InstallNestedRef, NodeRef} from "@/lib/types";
 
-const MESHDB_ENDPOINT = "http://db.nycmesh.net/api/v1/disambiguate-number/"
+const MESHDB_ENDPOINT = "https://db.nycmesh.net/api/v1/disambiguate-number/"
 
 // Wrapper around MeshDB's NN disambiguation endpoint (to keep the creds on the backend
 // and not have to worry about CORS, etc)
@@ -16,7 +16,7 @@ async function disambiguateNumberMeshDBInner(ambiguous_number: number): Promise<
   await incrementRateCounter(EndpointName.MESHDB_DISAMBIGUATE);
 
   // Validate that the frontend actually sent us an integer
-  if (parseInt(String(ambiguous_number))) {
+  if (!parseInt(String(ambiguous_number))) {
     throw new Error(`${ambiguous_number} is not a number`);
   }
 
