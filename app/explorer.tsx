@@ -141,7 +141,7 @@ export default function Explorer() {
             <div className="space-y-4">
               <div className={"mb-8"}>
                 <div className="mx-auto max-w-[500px]">
-                  <div className="space-y-4 -ml-5">
+                  <div className="space-y-4 md:-ml-5">
                     <h2 className={"font-bold text-2xl"}>
                       <img src={"NYC_Mesh_logo.svg"} alt={"NYC Mesh Logo"} className="h-10 inline mr-1 -mt-1"/> NYC Mesh{" "}
                       <span className={"font-normal"}>|</span> <span className={"font-normal"}>IP Explorer</span>
