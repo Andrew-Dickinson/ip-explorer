@@ -1,10 +1,13 @@
 "use server"
 
 import {createParallelAction} from "next-server-actions-parallel";
+import {incrementRateCounter} from "@/lib/rate-limits";
+import {EndpointName} from "@/lib/constants";
 
 async function getTokenInner(password: string): Promise<string | undefined> {
-  // Basic rate-limiting feature for bare minimum against brute force
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  // Throws if the rate limit is exceeded, gives the user "unknown error" which is not ideal
+  // but probably fine
+  await incrementRateCounter(EndpointName.GET_TOKEN);
 
   if (!process.env.SECURE_CONTENT_PSK || !process.env.SECURE_CONTENT_TOKEN) {
     throw new Error(`SECURE_CONTENT_PSK or SECURE_CONTENT_TOKEN is missing from env vars`);

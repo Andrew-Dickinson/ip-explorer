@@ -4,6 +4,7 @@ export const UISP_API_URL = `${UISP_URL}/api/v2.1`
 export const TOKEN_STORAGE_KEY = "secureContentToken";
 
 export enum EndpointName {
+  GET_TOKEN = "GET_TOKEN",
   UISP = "UISP",
   ROUTEROS_SSH_DHCP = "ROUTEROS_SSH_DHCP",
   IP_RANGES_RANGES = "IP_RANGES_RANGES",
