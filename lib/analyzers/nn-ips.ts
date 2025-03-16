@@ -26,7 +26,7 @@ export function nnIps(networkNumber: number): NNIPsResult {
 
   otherAddresses.push({  address: ospfIP(networkNumber, 0, true), description: "Primary router OSPF address on the WDS bridge" });
   otherAddresses.push({  address: ospfIP(networkNumber, 0), description: "Primary router OSPF address on the mesh bridge" });
-  otherAddresses.push({  address: ospfIP(networkNumber, 1, true), description: "Secondary router OSPF address on the mesh bridge (not common)" });
+  otherAddresses.push({  address: ospfIP(networkNumber, 1), description: "Secondary router OSPF address on the mesh bridge (not common)" });
 
   if (nnSecondPart <= THRID_IP_CUTOFF) otherAddresses.push({  address: ospfIP(networkNumber, 2), description: "Tertiary router OSPF address on the mesh bridge (very rare)" });
 
