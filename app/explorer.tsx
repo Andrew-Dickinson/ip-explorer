@@ -72,14 +72,22 @@ export default function Explorer() {
   const masonryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!masonryRef.current || !parsedAddress) return
+    if (!masonryRef.current) return
 
     const updateMasonryHeight = () => {
       const container = masonryRef.current
       if (!container) return
 
-      const items = container.querySelectorAll<HTMLElement>(`.${styles.masonryItem}`)
-      if (!items.length) return
+      const items = Array.from(container
+        .querySelectorAll<HTMLElement>(`.${styles.masonryItem}`)
+        .values().filter((item) => item.className.indexOf("hidden") == -1));
+      if (!items.length) {
+        // Set the container height to 0 if there are no visible elements
+        container.style.height = `0px`
+        container.style.position = "relative"
+
+        return;
+      }
 
       let columns = 1
       if (window.innerWidth >= 2200) columns = 4  // ~4xl
@@ -90,7 +98,7 @@ export default function Explorer() {
       let currentCol = 0
       const colHeights = Array(columns).fill(0)
 
-      items.values().filter((item) => item.className.indexOf("hidden") == -1).forEach((item) => {
+      items.forEach((item) => {
         // Find the column with the smallest height
         currentCol = colHeights.indexOf(Math.min(...colHeights))
 
@@ -220,72 +228,72 @@ export default function Explorer() {
                   </Card>
                 </div>
               )}
-              {parsedAddress && (
-                <div className={styles.masonry} style={{height: "auto", maxHeight: "none"}} ref={masonryRef}>
-                  {parsedAddress && staticResult ? (
+              <div className={styles.masonry} style={{height: "auto", maxHeight: "none"}} ref={masonryRef}>
+                {parsedAddress && staticResult ? (
+                  <div className={styles.masonryItem}>
+                    <IpExplainerCard {...staticResult} />
+                  </div>
+                ) : (
+                  <></>
+                )}
+                {/* pre-render the map card as "hidden" so that the map can start loading "below the fold" */}
+                <div className={styles.masonryItem + (!staticResult?.networkNumber ? " hidden" : "")}>
+                  <NnMap networkNumber={parsedAddress ? staticResult?.networkNumber : undefined}
+                         lastRefresh={lastRefresh}
+                         updateParsedAddress={setParsedAddress}/>
+                </div>
+                {parsedAddress && staticResult?.addressProvenance !== undefined ? (
+                  <>
                     <div className={styles.masonryItem}>
-                      <IpExplainerCard {...staticResult} />
-                    </div>
-                  ) : (
-                    <></>
-                  )}
-                  {parsedAddress && staticResult?.addressProvenance !== undefined ? (
-                    <>
-                      <div className={styles.masonryItem + (!staticResult.networkNumber ? " hidden" : "")}>
-                        <NnMap networkNumber={staticResult.networkNumber} lastRefresh={lastRefresh}
-                               updateParsedAddress={setParsedAddress}/>
-                      </div>
-                      <div className={styles.masonryItem}>
-                        <OspfLookup
-                          ipAddress={parsedAddress}
-                          isLoading={ospfQueryLoading}
-                          lookupResult={ospfLookupResult}
-                          error={ospfError}
-                        />
-                      </div>
-                      <div className={styles.masonryItem}>
-                        <UispLookup ipAddress={parsedAddress} lastRefresh={lastRefresh} />
-                      </div>
-                      <div className={styles.masonryItem}>
-                        <IcmpReachability ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
-                      </div>
-                      <div className={styles.masonryItem}>
-                        <TcpConnectivity ipAddress={parsedAddress} ports={TCP_PORTS_TO_SCAN} lastRefresh={lastRefresh}/>
-                      </div>
-                      <div className={styles.masonryItem}>
-                        <DnsLookup ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
-                      </div>
-                      <div className={styles.masonryItem}>
-                        <SnmpInfo ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
-                      </div>
-                      <div className={styles.masonryItem}>
-                        <IpRangesIps ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
-                      </div>
-                      <div className={styles.masonryItem}>
-                        <IpRangesHosts ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
-                      </div>
-                      {ospfLookupResult?.routerIds.length === 1 &&
-                      [AddressType.STATIC_10_70, AddressType.DHCP].includes(staticResult.addressType) ? (
-                        <div className={styles.masonryItem}>
-                          <DhcpLeaseLookup ipAddress={parsedAddress} ospfResult={ospfLookupResult} lastRefresh={lastRefresh}/>
-                        </div>
-                      ) : null}
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                  {parsedAddress && staticResult && staticResult.networkNumber ? (
-                    <div className={styles.masonryItem}>
-                      <IpsForNN
-                        networkNumber={staticResult.networkNumber}
+                      <OspfLookup
+                        ipAddress={parsedAddress}
+                        isLoading={ospfQueryLoading}
+                        lookupResult={ospfLookupResult}
+                        error={ospfError}
                       />
                     </div>
-                  ) : (
-                    <></>
-                  )}
-                </div>
-              )
-              }
+                    <div className={styles.masonryItem}>
+                      <UispLookup ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <IcmpReachability ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <TcpConnectivity ipAddress={parsedAddress} ports={TCP_PORTS_TO_SCAN} lastRefresh={lastRefresh}/>
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <DnsLookup ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <SnmpInfo ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <IpRangesIps ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
+                    </div>
+                    <div className={styles.masonryItem}>
+                      <IpRangesHosts ipAddress={parsedAddress} lastRefresh={lastRefresh}/>
+                    </div>
+                    {ospfLookupResult?.routerIds.length === 1 &&
+                    [AddressType.STATIC_10_70, AddressType.DHCP].includes(staticResult.addressType) ? (
+                      <div className={styles.masonryItem}>
+                        <DhcpLeaseLookup ipAddress={parsedAddress} ospfResult={ospfLookupResult}
+                                         lastRefresh={lastRefresh}/>
+                      </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <></>
+                )}
+                {parsedAddress && staticResult && staticResult.networkNumber ? (
+                  <div className={styles.masonryItem}>
+                    <IpsForNN
+                      networkNumber={staticResult.networkNumber}
+                    />
+                  </div>
+                ) : (
+                  <></>
+                )}
+              </div>
             </div>
           </div>
         </main>
