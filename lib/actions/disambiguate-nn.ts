@@ -15,6 +15,11 @@ async function disambiguateNumberMeshDBInner(ambiguous_number: number): Promise<
   // but probably fine
   await incrementRateCounter(EndpointName.MESHDB_DISAMBIGUATE);
 
+  // Validate that the frontend actually sent us an integer
+  if (parseInt(String(ambiguous_number))) {
+    throw new Error(`${ambiguous_number} is not a number`);
+  }
+
   if (!process.env.MESHDB_TOKEN) {
     throw new Error(`MESHDB_TOKEN is missing from env vars`);
   }
