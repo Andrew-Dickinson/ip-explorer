@@ -93,3 +93,29 @@ export type NotAssignableToJson =
   | bigint
   | symbol
   | CallbackFunctionVariadicAnyReturn;
+
+
+
+///////// MeshDB
+
+export interface NodeRef {
+  id: string; // UUID format
+  network_number: number | null;
+}
+
+export interface InstallNestedRef {
+  install_number: number;
+  id: string; // UUID format
+  node: NodeRef | null;
+}
+
+export interface DisambiguateNumberSupportingData {
+  exact_match_install: InstallNestedRef;
+  exact_match_recycled_install: InstallNestedRef;
+  exact_match_node: NodeRef;
+}
+
+export interface DisambiguateNumberSuccessResponse {
+  resolved_node: NodeRef;
+  supporting_data: DisambiguateNumberSupportingData;
+}

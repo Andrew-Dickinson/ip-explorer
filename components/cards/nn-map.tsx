@@ -3,6 +3,8 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/compo
 import {IPv4} from "ipaddr.js";
 import {ospfIP} from "@/lib/analyzers/nn-ips";
 import {Loader2} from "lucide-react";
+import {disambiguateNumberMeshDB} from "@/lib/actions/disambiguate-nn";
+import {runParallelAction} from "next-server-actions-parallel";
 
 export interface NnMapProps extends React.ComponentProps<"div"> {
   networkNumber?: number;
@@ -16,9 +18,7 @@ export function NnMap({networkNumber, lastRefresh, updateParsedAddress, classNam
 
   const syncMap = useCallback((networkNumber: number | undefined) => {
     if (iframeRef.current) {
-      if (networkNumber) {
-        iframeRef.current.contentWindow?.postMessage({selectedNodes: networkNumber.toString()}, "*");
-      }
+      iframeRef.current.contentWindow?.postMessage({selectedNodes: networkNumber?.toString()}, "*");
     }
   }, [iframeRef]);
 
@@ -27,15 +27,28 @@ export function NnMap({networkNumber, lastRefresh, updateParsedAddress, classNam
       syncMap(networkNumber)
     }
 
-    const listener = (event: unknown) => {
+    const listener = async (event: unknown) => {
       if (event instanceof Object && 'data' in event && event.data instanceof Object){
         if ('type' in event.data && event.data.type == "FETCH_NODES_SUCCESS") {
           setMapLoaded(true);
-          syncMap(networkNumber)
+          if (networkNumber) syncMap(networkNumber)
         } else if ('selectedNodes' in event.data && typeof event.data.selectedNodes === "string") {
           const parsedNum = parseInt(event.data.selectedNodes);
-          if (parsedNum <= 8000) {
-            updateParsedAddress(ospfIP(parsedNum, 0))
+          let resolved_number: number | undefined;
+          try {
+            resolved_number = await runParallelAction(disambiguateNumberMeshDB(parsedNum));
+          } catch {
+            resolved_number = undefined;
+          }
+
+          if (resolved_number) {
+            updateParsedAddress(ospfIP(resolved_number, 0))
+            // This will get repeated on a later call after the new address is pasred,
+            // but doing it here first makes the UI snappier
+            syncMap(resolved_number);
+          } else {
+            // If the user selected an Install dot with no NN, tell them "No!" by deselecting it
+            syncMap(undefined);
           }
         }
       }

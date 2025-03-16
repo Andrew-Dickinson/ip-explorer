@@ -4,6 +4,7 @@ import {headers} from "next/headers";
 
 
 export const rateLimitsByEndpoint: Record<EndpointName, number> = {
+  [EndpointName.MESHDB_DISAMBIGUATE]: 20,
   [EndpointName.GET_TOKEN]: 7,
   [EndpointName.UISP]: 20,
   [EndpointName.IP_RANGES_HOSTS]: 20,
