@@ -2,7 +2,7 @@
 
 import { promisify } from "util"
 import { IPv4 } from "ipaddr.js"
-import { analyzeStatic } from "@/lib/analyzers/static"
+import {isMeshAddress} from "@/lib/analyzers/static"
 import snmp from "net-snmp"
 import { getDeviceInfo } from "snmp-sysobjectid"
 import moment from "moment";
@@ -127,9 +127,9 @@ async function performSnmpQueryInner(
     throw new Error("Invalid IP address format")
   }
 
-  // Throws for non-mesh addresses, so we can't be coaxed into
+  // Throw for non-mesh addresses, so we can't be coaxed into
   // sending traffic out of the mesh
-  analyzeStatic(IPv4.parse(ipAddress))
+  if (!isMeshAddress(IPv4.parse(ipAddress))) { throw new Error("Non-mesh IP address") }
 
   let session: snmp.Session | undefined;
   try {

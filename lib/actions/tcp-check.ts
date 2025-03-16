@@ -1,7 +1,7 @@
 "use server"
 import { Socket } from "net"
 import { IPv4 } from "ipaddr.js"
-import { analyzeStatic } from "@/lib/analyzers/static"
+import {isMeshAddress} from "@/lib/analyzers/static"
 import {ActionResult, PortStatus} from "../types"
 import {createParallelAction} from "next-server-actions-parallel";
 import {incrementRateCounter} from "@/lib/rate-limits";
@@ -91,9 +91,9 @@ async function checkTcpConnectivityInner(ipAddress: string, ports: number[]): Pr
     throw new Error("Too many ports");
   }
 
-  // Throws for non-mesh addresses, so we can't be coaxed into
+  // Throw for non-mesh addresses, so we can't be coaxed into
   // sending traffic out of the mesh
-  analyzeStatic(IPv4.parse(ipAddress))
+  if (!isMeshAddress(IPv4.parse(ipAddress))) { throw new Error("Non-mesh IP address") }
 
   // Check all ports in parallel
   const results = await Promise.all(ports.map((port) => checkSinglePort(ipAddress, port)))

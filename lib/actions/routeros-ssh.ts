@@ -2,7 +2,7 @@
 
 import {checkOspfAdvertisementInner} from '@/lib/actions/ospf'
 import {IPv4} from "ipaddr.js";
-import {analyzeStatic} from "@/lib/analyzers/static";
+import {isMeshAddress} from "@/lib/analyzers/static";
 import {get_dhcp_match} from "@/lib/routeros_scripts/get_dhcp_match";
 import {SshClient} from "@/lib/ssh-helper";
 import {get_bridge_host} from "@/lib/routeros_scripts/get_bridge_hosts_match";
@@ -94,10 +94,10 @@ export async function lookupDhcpLeaseInner(
     throw new Error("Invalid IP address format")
   }
 
-  // Throws for non-mesh addresses, so we can't be coaxed into
+  // Throw for non-mesh addresses, so we can't be coaxed into
   // sending traffic out of the mesh
   const parsedAddress = IPv4.parse(ipAddress);
-  analyzeStatic(parsedAddress);
+  if (!isMeshAddress(parsedAddress)) { throw new Error("Non-mesh IP address") }
 
   // Do our own lookup of the OSPF router that advertises this IP, so the frontend can't lie to us
   const ospfResult =  await checkOspfAdvertisementInner(ipAddress);
@@ -124,10 +124,9 @@ export async function lookupDhcpLeaseInner(
     throw new Error("Invalid Router ID format")
   }
 
-  // Throws for non-mesh addresses, so we can't be coaxed into
+  // Throw for non-mesh addresses, so we can't be coaxed into
   // sending traffic out of the mesh
-  const parsedHostAddr = IPv4.parse(host);
-  analyzeStatic(parsedHostAddr);
+  if (!isMeshAddress(IPv4.parse(host))) { throw new Error("Non-mesh IP address") }
 
   const username = process.env.ROUTEROS_SSH_USER
   const password = process.env.ROUTEROS_SSH_PASSWORD

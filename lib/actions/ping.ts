@@ -3,7 +3,7 @@
 import {exec} from "child_process"
 import {promisify} from "util"
 import {IPv4} from "ipaddr.js";
-import {analyzeStatic} from "@/lib/analyzers/static";
+import {isMeshAddress} from "@/lib/analyzers/static";
 import {createParallelAction} from "next-server-actions-parallel";
 import {ActionResult} from "@/lib/types";
 import {incrementRateCounter} from "@/lib/rate-limits";
@@ -44,9 +44,9 @@ async function checkIcmpReachabilityInner(ipAddress: string): Promise<PingResult
     throw new Error("Invalid IP address format")
   }
 
-  // Throws for non-mesh addresses, so we can't be coaxed into
+  // Throw for non-mesh addresses, so we can't be coaxed into
   // sending traffic out of the mesh
-  analyzeStatic(IPv4.parse(ipAddress));
+  if (!isMeshAddress(IPv4.parse(ipAddress))) { throw new Error("Non-mesh IP address") }
 
   // Number of pings to send
   const count = 4

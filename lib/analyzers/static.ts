@@ -2,6 +2,18 @@ import {AddressProvenance, AddressType, StaticAddressCategory, StaticAnalysisRes
 import {IPv4} from "ipaddr.js";
 import {addressProvenanceCIDRs, addressTypeCIDRs, staticCategoryCIDRs} from "@/lib/range-lookups";
 
+export function isMeshAddress(address: IPv4) {
+  let addressProvenance: AddressProvenance | undefined = undefined;
+  for (const cidr in addressProvenanceCIDRs) {
+    if (address.match(IPv4.parseCIDR(cidr))){
+      addressProvenance = addressProvenanceCIDRs[cidr];
+    }
+  }
+  if (!addressProvenance) return false
+
+  return [AddressProvenance.MESH_RFC_1918, AddressProvenance.MESH_PUBLIC].includes(addressProvenance);
+}
+
 export function analyzeStatic(address: IPv4): StaticAnalysisResult {
   let addressProvenance: AddressProvenance | undefined = undefined;
   for (const cidr in addressProvenanceCIDRs) {
